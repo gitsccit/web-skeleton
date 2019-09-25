@@ -16,6 +16,6 @@ class {{ name }}Seed extends AbstractSeed
 {% endif %}
 
         $table = $this->table('{{ table }}');
-$table->insert($data)->save();
-}
+        $table->insert($data)->save();
+    }
 }

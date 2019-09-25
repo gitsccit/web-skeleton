@@ -32,12 +32,6 @@ Use option `-t Skeleton` when baking, e.g.
 ### Crud
 * Make `AppController` extend `\Skeleton\Controller\AppController`.
 
-* `bake` a new controller and connect the routes for your controller. The component will handle the
-  crud actions (index, view, add, edit, delete) for you.
-* If you wish to have customized behaviors for your crud actions:
-  * Override the actions in your controller.
-  * Write a query that retrieve the desired data.
-  * Pass the query to `$this->Crud->load($query)`.
 * All HTTP responses will be parsed based on the `Accept` header in the request, i.e., if `Accept` header 
   is set to `application/json`, the response will be json-serialized.
 
@@ -71,10 +65,10 @@ When using one of the Crud component methods in your controller to load the resp
 the following variables will be available in the view:
 
 * `accessibleFields` The fields assignable by the users. (Only set if action is one of `add` and `edit`) 
-* `associations` The associations of current table. E.g. An article's associations could be \['Authors', 'Tags'].
 * `className` The name of current controller.
 * `displayField` The display field of current table object.
 * `entity` / `entities` Only set if you are using the fallback templates.
+* `title` A user friendly title of the current page.
 
 #### Template Abstraction
 * Create template files in `/Template/{FallbackTemplateFolder}`. 
