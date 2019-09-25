@@ -35,9 +35,9 @@ Use option `-t Skeleton` when baking, e.g.
 * All HTTP responses will be parsed based on the `Accept` header in the request, i.e., if `Accept` header 
   is set to `application/json`, the response will be json-serialized.
 
-### Logging HTTP Requests
-All the HTTP requests are automatically logged, you should be able to see 
-all the requests in the `logs` database table.
+### Enum Options
+Use the `EnumTrait` in your ORM table object and use `getEnumOptions()` to read enum fields
+from that table.
 
 ### Soft Delete
 
@@ -83,7 +83,7 @@ the following variables will be available in the view:
 the Cake-designated template folder. 
 
 Example:
-* Create `index.ctp`, `add.ctp`, `view.ctp`, `edit.ctp`, `delete.ctp` in `/Template/Admin`.
+* Create `index.ctp`, `add.ctp`, `view.ctp`, `edit.ctp` in `/Template/Admin`.
 * Set `fallbackTemplatePath` option in `UsersController`:
     ```
     $crud = [
@@ -92,8 +92,14 @@ Example:
     ```
 * Delete `index.ctp`, `view.ctp` from `/Template/Users`. 
 Now the `index` and `view` methods will fallback to the corresponding templates in `/Admin`,
-whereas `add`, `edit`, `delete` will be using the templates in `/Users`
+whereas `add`, `edit` will be using the templates in `/Users`
 
-#### View Helper
-Skeleton provides a useful helper `Utils` to help you write your template files.
-To load this helper, add `$this->loadHelper('Skeleton.Utils');` in your `AppView`'s `initialize()` method.
+### View Helper
+
+*To load helpers, add `$this->loadHelper('Skeleton.{helperName}');` in your `AppView`'s `initialize()` method.*
+
+#### UtilsHelper
+Utility tools to help you write your template files.
+
+#### PhoneHelper
+Parses a phone number into a user friendly format.

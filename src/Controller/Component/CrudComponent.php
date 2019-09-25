@@ -121,10 +121,12 @@ class CrudComponent extends Component
         $className = $this->_controller->getName();
         $displayField = $this->_table->getDisplayField();
         $title = Inflector::humanize($this->_table->getAlias());
-        $name = $this->_action === 'index' ? 'entities' : 'entity';
-        $entityName = $this->_action === 'index' ? $className : Inflector::classify($className);
-        $entity = $data[lcfirst($entityName)];
-        $this->_controller->set([$name => $entity]);
+        if (in_array($this->_action, ['index', 'view', 'add', 'edit'])) {
+            $name = $this->_action === 'index' ? 'entities' : 'entity';
+            $entityName = $this->_action === 'index' ? $className : Inflector::classify($className);
+            $entity = $data[lcfirst($entityName)];
+            $this->_controller->set([$name => $entity]);
+        }
 
         // set $accessibleFields and $viewVars if action requires user input
         if (in_array($this->_action, ['add', 'edit'])) {

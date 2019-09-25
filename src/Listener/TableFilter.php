@@ -29,12 +29,11 @@ class TableFilter implements EventListenerInterface
     {
         $queryParams = $this->_controller->getRequest()->getQueryParams();
         $controllerName = $this->_controller->getName();
-        $action = $this->_controller->getRequest()->getParam('action');
         $tableName = $event->getSubject()->getAlias();
         $filter = $queryParams['filter'] ?? null;
         $key = $queryParams['key'] ?? null;
 
-        if ($controllerName === $tableName && $action === 'index' && $primary && $filter && $key) {
+        if ($controllerName === $tableName && $primary && $filter && $key) {
             $query->andWhere([["$filter LIKE" => "%$key%"]]);
         }
     }
