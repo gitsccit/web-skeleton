@@ -1,0 +1,50 @@
+<?php
+
+namespace {{ namespace }}\Controller{{ prefix }};
+
+/**
+ * {{ name }} Controller
+ *
+{% if defaultModel %}
+ * @property \{{ defaultModel }} ${{ name }}
+{% endif %}
+
+{%- for component in components %}
+{% set classInfo = Bake.classInfo(component, 'Controller/Component', 'Component') %}
+ * @property {{ classInfo.fqn }} ${{ classInfo.name }}
+{% endfor %}
+
+{%- if 'index' in actions %}
+ *
+ * @method \{{ namespace }}\Model\Entity\{{ entityClassName }}[]
+{% endif %}
+ */
+class {{ name }}Controller extends {{ override ? "\\#{theme}\\Controller\\#{name}Controller" : 'AppController' }}
+{
+//    public $crud = [
+//        'fallbackTemplatePath' => 'Common'
+//    ];
+{% if actions %}
+
+{% endif %}
+{% set helpers = Bake.arrayProperty('helpers', helpers, {'indent': false})|raw %}
+{% if helpers|trim %}
+    {{- helpers|raw }}
+{% if components %}
+
+{% endif %}
+{% endif %}
+{%- set components = Bake.arrayProperty('components', components, {'indent': false})|raw %}
+{% if components|trim %}
+    {{- components|raw }}
+{% if actions %}
+
+{% endif %}
+{% endif %}
+{%- for action in actions %}
+{% if loop.index > 1 %}
+
+{% endif %}
+    {%- element 'Controller/' ~ action %}
+{% endfor %}
+}

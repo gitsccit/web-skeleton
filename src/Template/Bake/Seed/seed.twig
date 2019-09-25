@@ -1,0 +1,21 @@
+<?php
+use Skeleton\Seed\AbstractSeed;
+
+/**
+ * {{ name }} seed.
+ */
+class {{ name }}Seed extends AbstractSeed
+{
+
+    public function change()
+    {
+{% if records %}
+        $data = [{{ Bake.stringifyList(records, {'indent': false})|raw }}];
+{% else %}
+        $data = [];
+{% endif %}
+
+        $table = $this->table('{{ table }}');
+$table->insert($data)->save();
+}
+}

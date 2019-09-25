@@ -1,0 +1,33 @@
+{
+    "name": "gitsccit/web-skeleton",
+    "description": "Skeleton plugin for CakePHP",
+    "type": "cakephp-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Xun Chen",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "cakephp/cakephp": "3.8.*",
+        "cakephp/migrations": "^2.0.0"
+    },
+    "require-dev": {
+        "cakephp/bake": "^1.9.0",
+        "cakephp/cakephp-codesniffer": "3.*",
+        "phpunit/phpunit": "6.*",
+        "squizlabs/php_codesniffer": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Skeleton\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Skeleton\\Test\\": "tests/",
+            "Cake\\Test\\": "vendor/cakephp/cakephp/tests/"
+        }
+    }
+}
