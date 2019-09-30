@@ -105,6 +105,8 @@ class CrudComponent extends Component
         // set template
         $templateName = Inflector::underscore($this->_action) . '.ctp';
         $fallbackTemplatePath = $this->getConfig('fallbackTemplatePath');
+        list($plugin, $templateFolder) = pluginSplit($fallbackTemplatePath);
+        $basePath = is_null($plugin) ? App::path('Template')[0] : App::path('Template', $plugin)[0];
         if ($template) {
             $components = explode(DS, $template);
             if (count($components) > 1) {
@@ -112,9 +114,10 @@ class CrudComponent extends Component
                 $this->_controller->viewBuilder()->setTemplatePath(implode(DS, $components));
             }
             $this->_controller->viewBuilder()->setTemplate($template);
-        } elseif (!file_exists(App::path('Template/' . $this->_viewPath())[0] . $templateName)
-            && file_exists(App::path("Template/$fallbackTemplatePath")[0] . $templateName)) {
-            $this->_controller->viewBuilder()->setTemplatePath($fallbackTemplatePath);
+        } elseif (!file_exists(App::path('Template')[0] . $this->_viewPath() . $templateName)
+            && file_exists($basePath . $templateFolder . DS . $templateName)) {
+            $this->_controller->viewBuilder()->setTheme($plugin);
+            $this->_controller->viewBuilder()->setTemplatePath($templateFolder);
         }
 
         // set view variables
@@ -235,9 +238,14 @@ class CrudComponent extends Component
 
         $resultSets[lcfirst(Inflector::classify($table->getAlias()))] = $entity;
         foreach ($queries as $query) {
-            $field = Inflector::variable($query->getRepository()->getRegistryAlias());
+            $table = $query->getRepository();
+            $field = Inflector::variable($table->getAlias());
             $fieldSettings = array_merge($settings, ['scope' => Inflector::dasherize($field)]);
-            $resultSets['associations'][$field] = $this->_controller->Paginator->paginate($query, $fieldSettings);
+            $result = $this->_controller->Paginator->paginate($query, $fieldSettings);
+            if ($result->count() === 0) {
+                $result = $table;
+            }
+            $resultSets['associations'][$field] = $result;
         }
 
         return $resultSets;
@@ -278,10 +286,10 @@ class CrudComponent extends Component
                 'Cake\Utility\Inflector::camelize',
                 explode('/', $this->_request->getParam('prefix'))
             );
-            $viewPath = implode(DIRECTORY_SEPARATOR, $prefixes) . DIRECTORY_SEPARATOR . $viewPath;
+            $viewPath = implode(DS, $prefixes) . DS . $viewPath;
         }
 
-        return $viewPath;
+        return $viewPath . DS;
     }
 
     protected function _setFilterOptions()

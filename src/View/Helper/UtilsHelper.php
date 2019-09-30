@@ -57,7 +57,7 @@ class UtilsHelper extends Helper
     /**
      * Parses a list of entities into displayable table cells, with `Actions` as the last column.
      *
-     * @param Table|CollectionInterface|array|string $entities A list of entities to be parsed, or a table object.
+     * @param Table|CollectionInterface|array|string $entities A list of entities to be parsed, a table object, or the alias of the table.
      * @return string
      */
     public function createTable($entities)
@@ -94,7 +94,7 @@ class UtilsHelper extends Helper
         }
 
         // construct the header of the table
-        $this->_View->Paginator->defaultModel($table->getRegistryAlias());
+        $this->_View->Paginator->defaultModel($table->getAlias());
         $thead = $this->Html->tableHeaders(
             array_merge(array_map(function ($field) {
                 return $this->_View->Paginator->sort($field);
