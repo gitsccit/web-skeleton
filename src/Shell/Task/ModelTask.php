@@ -31,10 +31,10 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
         $data = $this->getTableContext($tableObject, $table, $name);
 
         if (($theme = $this->param('theme')) && class_exists("\\$theme\Model\Table\\{$name}Table")) {
-            $className = $theme . '.' . $name;
+            $className = "$theme.$name";
 
             if (!empty($plugin)) {
-                $className = $plugin . '.' . $className;
+                $className = "$plugin.$className";
             }
 
             $themeTableObject = $this->getTableObject($className, $table);

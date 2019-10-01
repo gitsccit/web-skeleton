@@ -42,13 +42,6 @@ class CrudComponent extends Component
     protected $_request;
 
     /**
-     * The class name of the entity associated with the current table.
-     *
-     * @var string
-     */
-    protected $_entityClass;
-
-    /**
      * The current controller action.
      *
      * @var string
@@ -82,22 +75,30 @@ class CrudComponent extends Component
     {
         parent::initialize($config);
 
-        $this->_table = $this->_controller->{$this->_controller->getName()};
+        $this->_table = App::className($this->_controller->modelClass, 'Model\Table', 'Table') ?
+            TableRegistry::getTableLocator()->get($this->_controller->modelClass) : null;
         $this->_request = $this->_controller->getRequest();
         $this->_action = $this->_request->getParam('action');
 
         $acceptsContentTypes = $this->_request->accepts();
         $this->_serialized = !empty(array_intersect(['application/json', 'application/xml'], $acceptsContentTypes))
             && !in_array('text/html', $acceptsContentTypes);
-        $this->_entityClass = $this->_table->getEntityClass();
     }
 
     public function beforeRender(Event $event)
     {
         $data = $this->_controller->viewVars;
 
+        if (isset($data['_serialize'])) {
+            return $this->_controller->viewBuilder()->setClassName('Json');
+        }
+
         if ($this->_serialized) {
             return $this->serialize($data);
+        }
+
+        if (!$this->_table) {
+            return $event;
         }
 
         $template = $this->_controller->viewBuilder()->getTemplate();
@@ -140,7 +141,8 @@ class CrudComponent extends Component
             $entityFields = array_merge($this->_table->getSchema()->columns(),
                 array_map([Inflector::class, 'underscore'], $belongsTo));
             $accessibleFields = array_filter($entityFields, function ($field) {
-                return (new $this->_entityClass())->isAccessible($field);
+                $entityClass = $this->_table->getEntityClass();
+                return (new $entityClass())->isAccessible($field);
             });
             $this->_controller->set(compact('accessibleFields'));
         }
@@ -294,7 +296,7 @@ class CrudComponent extends Component
 
     protected function _setFilterOptions()
     {
-        if (($entityClass = $this->_entityClass) && property_exists($entityClass, 'filterable')) {
+        if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
             $filterOptions = [];
             foreach ($entityClass::$filterable as $key => $field) {
                 // current table field
