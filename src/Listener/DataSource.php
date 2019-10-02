@@ -24,8 +24,10 @@ class DataSource implements EventListenerInterface
     {
         $table = $event->getSubject();
         $configName = $table->getConnection()->configName();
-        if (endsWith($configName, '_master')) {
-            ConnectionManager::alias(str_replace('_master', '', $configName), 'default');
+
+        if (!endsWith($configName, 'replica')) {
+            $config = $configName === 'default' ? 'replica' : "${configName}_replica";
+            $table->setConnection(ConnectionManager::get($config));
         }
     }
 
@@ -43,12 +45,15 @@ class DataSource implements EventListenerInterface
     {
         $table = $event->getSubject();
         $configName = $table->getConnection()->configName();
-        if (!endsWith($configName, '_master')) {
+
+        if (endsWith($configName, 'replica')) {
             $event->stopPropagation();
             $table->getConnection()->rollback();
-            ConnectionManager::alias("${configName}_master", 'default');
-            $table->setConnection(ConnectionManager::get('default'));
+            $config = $configName === 'replica' ? 'default' : str_replace('_replica', '', $configName);
+            ConnectionManager::alias($config, $configName);
+            $table->setConnection(ConnectionManager::get($configName));
             $event->setResult($table->$action($event->getData('entity'), $event->getData('options')->getArrayCopy()));
+            ConnectionManager::dropAlias($configName);
         }
     }
 }

@@ -29,10 +29,10 @@ try {
 $plugins = array_diff_improved(Plugin::loaded(), ['DebugKit', 'Migrations']);
 foreach ($plugins as $plugin) {
     $plugin = Inflector::underscore($plugin);
-    foreach (['default', 'default_master'] as $dataSource) {
+    foreach (['default', 'replica'] as $dataSource) {
         $config = ConnectionManager::getConfig($dataSource);
         $config['database'] = $plugin;
-        $config['name'] = str_replace('default', $plugin, $config['name']);
+        $config['name'] = $dataSource === 'default' ? $plugin : "${plugin}_replica";
         ConnectionManager::setConfig($config['name'], $config);
     }
 }
