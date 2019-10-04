@@ -53,7 +53,7 @@ from that table.
   E.g. If you wish to soft-delete all the articles belonging to a user that is being deleted,
   in  `UsersTable.initialize`, you would have this in your table associations:
   ```
-  $this->hasMany('Articles', [
+  $this->hasMany('Users', [
       'foreignKey' => 'user_id',
       'cascadeCallbacks' => true,
       'dependent' => true

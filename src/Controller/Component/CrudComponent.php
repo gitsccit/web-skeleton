@@ -124,11 +124,12 @@ class CrudComponent extends Component
         // set view variables
         $className = $this->_controller->getName();
         $displayField = $this->_table->getDisplayField();
-        $title = Inflector::humanize($this->_table->getAlias());
-        if (in_array($this->_action, ['index', 'view', 'add', 'edit'])) {
-            $name = $this->_action === 'index' ? 'entities' : 'entity';
-            $entityName = $this->_action === 'index' ? $className : Inflector::classify($className);
-            $entity = $data[lcfirst($entityName)];
+        $title = humanize($this->_table->getAlias());
+
+        // set $entities / $entity
+        $name = $this->_action === 'index' ? 'entities' : 'entity';
+        $entityName = lcfirst($this->_action === 'index' ? $className : Inflector::classify($className));
+        if ($entity = $data[$entityName] ?? null) {
             $this->_controller->set([$name => $entity]);
         }
 
@@ -301,7 +302,7 @@ class CrudComponent extends Component
             foreach ($entityClass::$filterable as $key => $field) {
                 // current table field
                 if (is_numeric($key)) {
-                    $filterOptions["{$this->_table->getAlias()}.$field"] = Inflector::humanize($field);
+                    $filterOptions["{$this->_table->getAlias()}.$field"] = humanize($field);
                     continue;
                 }
 
@@ -313,7 +314,7 @@ class CrudComponent extends Component
 
                 foreach ($field as $subField) {
                     $value = Inflector::pluralize($assoc) . ".$subField";
-                    $filterOptions[$assoc][$value] = Inflector::humanize($subField);
+                    $filterOptions[$assoc][$value] = humanize($subField);
                 }
             }
             $this->_controller->set(compact('filterOptions'));

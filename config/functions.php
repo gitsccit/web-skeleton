@@ -1,5 +1,7 @@
 <?php
 
+use Cake\Utility\Inflector;
+
 function startsWith($haystack, $needle)
 {
     return substr($haystack, 0, strlen($needle)) === $needle;
@@ -158,7 +160,19 @@ function random_string($length = 32)
     return $string;
 }
 
+/**
+ * Generate a random token.
+ */
 function generate_token($length = 256)
 {
     return substr(bin2hex(openssl_random_pseudo_bytes(ceil($length / 2))), 0, $length);
+}
+
+/**
+ * @param $string 'a_human_Readable string'
+ * @return string 'A Human Readable String'
+ */
+function humanize($string)
+{
+    return Inflector::humanize(Inflector::underscore($string));
 }
