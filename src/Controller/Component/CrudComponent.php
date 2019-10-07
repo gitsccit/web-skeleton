@@ -145,6 +145,7 @@ class CrudComponent extends Component
                 $entityClass = $this->_table->getEntityClass();
                 return (new $entityClass())->isAccessible($field);
             });
+            $accessibleFields = array_combine($accessibleFields, array_fill(0, count($accessibleFields), []));
             $this->_controller->set(compact('accessibleFields'));
         }
 
