@@ -44,7 +44,7 @@ class UtilsHelper extends Helper
             $value = $this->Html->link($value->{$table->getDisplayField()},
                 ['controller' => $tableAlias, 'action' => 'view', $value->id, 'plugin' => $plugin]);
         } elseif ($value instanceof \DateTimeInterface) {
-            $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone');
+            $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
             $value = $this->_View->Time->format($value, null, null, $timezone);
         } elseif (empty($value)) {
             $value = "—";
