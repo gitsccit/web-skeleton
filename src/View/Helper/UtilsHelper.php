@@ -105,10 +105,11 @@ class UtilsHelper extends Helper
         // construct the body of the table
         $tbody = array_map(function (EntityInterface $entity) use ($controller, $displayField, $visibleFields) {
             $view = $this->Html->link(__('View'), ['controller' => $controller, 'action' => 'view', $entity->id]);
-            $edit = $this->Html->link(__('Edit'), ['controller' => $controller, 'action' => 'edit', $entity->id]);
-            $delete = $this->Form->postLink(__('Delete'),
+            $edit = $this->Html->link('<i class="icon-edit"></i>' . __('Edit'),
+                ['controller' => $controller, 'action' => 'edit', $entity->id], ['escape' => false]);
+            $delete = $this->Form->postLink('<i class="icon-trash-empty"></i>' . __('Delete'),
                 ['controller' => $controller, 'action' => 'delete', $entity->id],
-                ['confirm' => __('Are you sure you want to delete # {0}?', $entity->$displayField)]);
+                ['confirm' => __('Are you sure you want to delete # {0}?', $entity->$displayField), 'escape' => false]);
             $actions = $displayField === 'id' ? "$view | $edit" : "$edit";
 
             return $this->Html->tableCells(
