@@ -35,9 +35,32 @@ Use option `-t Skeleton` when baking, e.g.
 * All HTTP responses will be parsed based on the `Accept` header in the request, i.e., if `Accept` header 
   is set to `application/json`, the response will be json-serialized.
 
+* Sets a number of convenient view variables for the template to use. See `Template` section below for the list.
+
+### Master/Replica Database Connections
+* Configure `default` datasource to connect to the master database, and `replica` to replica database.
+
+* Datasource configuration for plugins are created from master/replica during bootstrap. 
+  E.g., `apps` and `apps_replica` datasource configurations will be created for the plugin `Apps`,
+  based on `default` and `replica` configurations.
+
+* `DataSource` Event Listener reconfigures `save()` and `delete()` to use `default` connection, 
+  and `find()` to use `{*_}replica` connection.
+
 ### Enum Options
 Use the `EnumTrait` in your ORM table object and use `getEnumOptions()` to read enum fields
 from that table.
+
+### Global Helper Functions
+`config/functions.php` contains globally available helper functions. E.g.,
+* startsWith(‘disease’, ‘dis’) => true
+* endsWith(‘disease’, ‘ease’) => true
+* timestamp() => ‘2019-10-03 16:00:00’
+* is_assoc(\[‘key’ => ‘value’]) => true | is_assoc(\[‘JustValue’]) => false
+
+### Request Sanitation
+`RequestSanitationMiddleware` replaces credit card numbers with `X` in all user submitted fields.
+You can define a list of valid credit card fields in the middleware.
 
 ### Soft Delete
 
@@ -59,6 +82,11 @@ from that table.
       'dependent' => true
   ]);
   ```
+
+### Table Filter
+Set `filter` and `key` in query params to filter table. E.g. 
+* `/pages?filter=Pages.title&key=skeleton` will return page entries where the title contains 'skeleton'. 
+* `/pages?filter=Tags.name&key=plugins` will return page entries where the tag name contains 'plugins'. 
 
 ### Templates
 When using one of the Crud component methods in your controller to load the response,
