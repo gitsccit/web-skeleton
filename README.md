@@ -29,6 +29,11 @@ include CRUD operations, file handling, HTTP request logging, soft-deletion, aut
 Use option `-t Skeleton` when baking, e.g.
 `bin/cake bake all users -t Skeleton`
 
+### Behaviors
+
+#### CurrentUser
+For all incoming save request, this behavior sets `user_id` in request data to `Session::read('Auth.User.id')`.
+
 ### Crud
 * Make `AppController` extend `\Skeleton\Controller\AppController`.
 
