@@ -48,7 +48,7 @@ class UtilsHelper extends Helper
             $value = $this->_View->Time->format($value, null, null, $timezone);
         } elseif (empty($value)) {
             $value = "—";
-        } else {
+        } elseif ($value === strip_tags($value)) {
             $value = h($value);
         }
 
