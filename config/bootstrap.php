@@ -26,14 +26,16 @@ try {
 }
 
 // add db config for plugins
-$plugins = array_diff_improved(Plugin::loaded(), ['DebugKit', 'Migrations']);
+$plugins = array_merge(array_diff_improved(Plugin::loaded(), ['DebugKit', 'Migrations']), ['test']);
 foreach ($plugins as $plugin) {
     $plugin = Inflector::underscore($plugin);
     foreach (['default', 'replica'] as $dataSource) {
         $config = ConnectionManager::getConfig($dataSource);
         $config['database'] = $plugin;
         $config['name'] = $dataSource === 'default' ? $plugin : "${plugin}_replica";
-        ConnectionManager::setConfig($config['name'], $config);
+        if (is_null(ConnectionManager::getConfig($config['name']))) {
+            ConnectionManager::setConfig($config['name'], $config);
+        }
     }
 }
 
