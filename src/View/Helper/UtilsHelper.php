@@ -40,9 +40,9 @@ class UtilsHelper extends Helper
             $value = $value ? __('Yes') : __('No');
         } elseif ($value instanceof EntityInterface) {
             $table = TableRegistry::getTableLocator()->get($value->getSource());
-            list($plugin, $tableAlias) = pluginSplit($table->getRegistryAlias());
+            list($plugin, ) = pluginSplit($table->getRegistryAlias());
             $value = $this->Html->link($value->{$table->getDisplayField()},
-                ['controller' => $tableAlias, 'action' => 'view', $value->id, 'plugin' => $plugin]);
+                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'plugin' => $plugin]);
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
             $value = $this->_View->Time->format($value, null, null, $timezone);
