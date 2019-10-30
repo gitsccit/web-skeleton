@@ -241,6 +241,7 @@ class CrudComponent extends Component
         $settings += $this->_controller->paginate;
 
         $resultSets[lcfirst(Inflector::classify($table->getAlias()))] = $entity;
+        $resultSets['associations'] = [];
         foreach ($queries as $query) {
             $table = $query->getRepository();
             $field = Inflector::variable($table->getAlias());
