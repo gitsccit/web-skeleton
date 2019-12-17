@@ -13,7 +13,7 @@
         "cakephp/cakephp": ">=3.8"
     },
     "require-dev": {
-        "cakephp/cakephp-codesniffer": "3.*",
+        "cakephp/cakephp-codesniffer": ">=3.2",
         "phpunit/phpunit": "6.*",
         "squizlabs/php_codesniffer": "*"
     },
