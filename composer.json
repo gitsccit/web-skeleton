@@ -10,11 +10,9 @@
         }
     ],
     "require": {
-        "cakephp/cakephp": "3.8.*",
-        "cakephp/migrations": "^2.0.0"
+        "cakephp/cakephp": ">=3.8"
     },
     "require-dev": {
-        "cakephp/bake": "^1.9.0",
         "cakephp/cakephp-codesniffer": "3.*",
         "phpunit/phpunit": "6.*",
         "squizlabs/php_codesniffer": "*"
