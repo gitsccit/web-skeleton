@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Skeleton\Controller;
 
@@ -22,7 +23,7 @@ class AppController extends Controller
     /**
      * Settings for crud.
      *
-     * - `fallbackTemplatePath` - Path to the fallback template folder, relative to /src/Template/, defaults to 'Common'.
+     * - `fallbackTemplatePath` - Path to the fallback template folder, relative to /templates, defaults to 'Common'.
      *
      * @var array
      */
@@ -38,7 +39,7 @@ class AppController extends Controller
      * @return void
      * @throws \Exception
      */
-    public function initialize()
+    public function initialize(): void
     {
         parent::initialize();
 

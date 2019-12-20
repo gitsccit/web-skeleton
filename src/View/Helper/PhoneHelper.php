@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Phone Helper (https://github.com/PotatoPowered/phone-helper)
  *

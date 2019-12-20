@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Skeleton\Controller\Component;
 
@@ -104,10 +105,10 @@ class CrudComponent extends Component
         $template = $this->_controller->viewBuilder()->getTemplate();
 
         // set template
-        $templateName = Inflector::underscore($this->_action) . '.ctp';
+        $templateName = Inflector::underscore($this->_action) . '.php';
         $fallbackTemplatePath = $this->getConfig('fallbackTemplatePath');
         list($plugin, $templateFolder) = pluginSplit($fallbackTemplatePath);
-        $basePath = is_null($plugin) ? App::path('Template')[0] : App::path('Template', $plugin)[0];
+        $basePath = is_null($plugin) ? App::path('templates')[0] : App::path('templates', $plugin)[0];
         if ($template) {
             $components = explode(DS, $template);
             if (count($components) > 1) {
@@ -115,7 +116,7 @@ class CrudComponent extends Component
                 $this->_controller->viewBuilder()->setTemplatePath(implode(DS, $components));
             }
             $this->_controller->viewBuilder()->setTemplate($template);
-        } elseif (!file_exists(App::path('Template')[0] . $this->_viewPath() . $templateName)
+        } elseif (!file_exists(App::path('templates')[0] . $this->_viewPath() . $templateName)
             && file_exists($basePath . $templateFolder . DS . $templateName)) {
             $this->_controller->viewBuilder()->setTheme($plugin);
             $this->_controller->viewBuilder()->setTemplatePath($templateFolder);

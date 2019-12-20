@@ -116,14 +116,14 @@ the following variables will be available in the view:
 the Cake-designated template folder. 
 
 Example:
-* Create `index.ctp`, `add.ctp`, `view.ctp`, `edit.ctp` in `/Template/Admin`.
+* Create `index.php`, `add.php`, `view.php`, `edit.php` in `/Template/Admin`.
 * Set `fallbackTemplatePath` option in `UsersController`:
     ```
     $crud = [
         'fallbackTemplatePath` => 'Admin'
     ];
     ```
-* Delete `index.ctp`, `view.ctp` from `/Template/Users`. 
+* Delete `index.php`, `view.php` from `/Template/Users`. 
 Now the `index` and `view` methods will fallback to the corresponding templates in `/Admin`,
 whereas `add`, `edit` will be using the templates in `/Users`
 
