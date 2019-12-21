@@ -6,7 +6,7 @@ namespace Skeleton\Controller;
 use Cake\Controller\Controller;
 use Cake\Controller\Exception\SecurityException;
 use Cake\Core\Configure;
-use Cake\Event\Event;
+use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\Routing\Router;
 use Skeleton\Listener\TableFilter;
@@ -60,8 +60,10 @@ class AppController extends Controller
     // Lifecycle Functions
     //======================================================================
 
-    public function beforeFilter(Event $event)
+    public function beforeFilter(EventInterface $event)
     {
+        parent::beforeFilter($event);
+
         if (!Configure::read('debug')) {
             $this->Security->requireSecure();
         }

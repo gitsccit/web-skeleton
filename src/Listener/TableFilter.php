@@ -19,7 +19,7 @@ class TableFilter implements EventListenerInterface
         $this->_controller = $controller;
     }
 
-    public function implementedEvents()
+    public function implementedEvents(): array
     {
         return [
             'Model.beforeFind' => 'beforeFind',

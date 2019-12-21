@@ -72,12 +72,11 @@ class CrudComponent extends Component
         parent::__construct($registry, $config);
     }
 
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         parent::initialize($config);
 
-        $this->_table = App::className($this->_controller->modelClass, 'Model\Table', 'Table') ?
-            TableRegistry::getTableLocator()->get($this->_controller->modelClass) : null;
+        $this->_table = $this->_controller->{$this->_controller->getName()} ?? null;
         $this->_request = $this->_controller->getRequest();
         $this->_action = $this->_request->getParam('action');
 
