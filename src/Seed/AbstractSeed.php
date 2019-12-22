@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Skeleton\Seed;
 
@@ -6,9 +7,8 @@ use Phinx\Db\Table;
 
 abstract class AbstractSeed extends \Phinx\Seed\AbstractSeed
 {
-
     /**
-     * @param string|Table $table
+     * @param string|\Phinx\Db\Table $table
      * @param array $data
      * E.g.
      *

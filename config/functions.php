@@ -15,7 +15,7 @@ function endsWith($haystack, $needle)
         return true;
     }
 
-    return (substr($haystack, -$length) === $needle);
+    return substr($haystack, -$length) === $needle;
 }
 
 /**
@@ -34,7 +34,7 @@ function timestamp()
  */
 function is_assoc($arr)
 {
-    if (!is_array($arr) || [] === $arr) {
+    if (!is_array($arr) || $arr === []) {
         return false;
     }
 
@@ -71,7 +71,7 @@ function array_diff_assoc_improved(array $array1, array $array2, array $_ = [])
  */
 function array_diff_improved(array $array1, array $array2, array $_ = [])
 {
-    $map = array();
+    $map = [];
     $arraysList1 = [];
     $arraysList2 = [];
     foreach ($array1 as $value) {

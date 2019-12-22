@@ -8,18 +8,15 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Cake\View\Helper;
-use Cake\View\Helper\FormHelper;
-use Cake\View\Helper\HtmlHelper;
 
 /**
  * Utils helper
  *
- * @property FormHelper $Form
- * @property HtmlHelper $Html
+ * @property \Cake\View\Helper\FormHelper $Form
+ * @property \Cake\View\Helper\HtmlHelper $Html
  */
 class UtilsHelper extends Helper
 {
-
     /**
      * Default configuration.
      *
@@ -41,9 +38,11 @@ class UtilsHelper extends Helper
             $value = $value ? __('Yes') : __('No');
         } elseif ($value instanceof EntityInterface) {
             $table = TableRegistry::getTableLocator()->get($value->getSource());
-            list($plugin, ) = pluginSplit($table->getRegistryAlias());
-            $value = $this->Html->link($value->{$table->getDisplayField()},
-                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'plugin' => $plugin]);
+            [$plugin, ] = pluginSplit($table->getRegistryAlias());
+            $value = $this->Html->link(
+                $value->{$table->getDisplayField()},
+                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'plugin' => $plugin]
+            );
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
             $value = $this->_View->Time->format($value, null, null, $timezone);
@@ -59,7 +58,7 @@ class UtilsHelper extends Helper
     /**
      * Parses a list of entities into displayable table cells, with `Actions` as the last column.
      *
-     * @param Table|CollectionInterface|array|string $entities A list of entities to be parsed, a table object, or the alias of the table.
+     * @param \Cake\ORM\Table|\Cake\Collection\CollectionInterface|array|string $entities A list of entities to be parsed, a table object, or the alias of the table.
      * @return string
      */
     public function createTable($entities)
@@ -68,8 +67,10 @@ class UtilsHelper extends Helper
             $table = is_string($entities) ? TableRegistry::getTableLocator()->get($entities) : $entities;
             $entityClass = $table->getEntityClass();
             $entity = new $entityClass();
-            $visibleFields = array_diff_improved(array_merge($table->getSchema()->columns(), $entity->getVirtual()),
-                $entity->getHidden());
+            $visibleFields = array_diff_improved(
+                array_merge($table->getSchema()->columns(), $entity->getVirtual()),
+                $entity->getHidden()
+            );
             $entities = [];
         } elseif (($entities instanceof CollectionInterface && $entities->count() > 0) || (is_array($entities) && !empty($entities))) {
             if ($entities instanceof CollectionInterface) {
@@ -106,18 +107,25 @@ class UtilsHelper extends Helper
         // construct the body of the table
         $tbody = array_map(function (EntityInterface $entity) use ($controller, $displayField, $visibleFields) {
             $view = $this->Html->link(__('View'), ['controller' => $controller, 'action' => 'view', $entity->id]);
-            $edit = $this->Html->link('<i class="icon-edit"></i>' . __('Edit'),
-                ['controller' => $controller, 'action' => 'edit', $entity->id], ['escape' => false]);
-            $delete = $this->Form->postLink('<i class="icon-trash-empty"></i>' . __('Delete'),
+            $edit = $this->Html->link(
+                '<i class="icon-edit"></i>' . __('Edit'),
+                ['controller' => $controller, 'action' => 'edit', $entity->id],
+                ['escape' => false]
+            );
+            $delete = $this->Form->postLink(
+                '<i class="icon-trash-empty"></i>' . __('Delete'),
                 ['controller' => $controller, 'action' => 'delete', $entity->id],
-                ['confirm' => __('Are you sure you want to delete # {0}?', $entity->$displayField), 'escape' => false]);
+                ['confirm' => __('Are you sure you want to delete # {0}?', $entity->$displayField), 'escape' => false]
+            );
             $actions = $displayField === 'id' ? "$view | $edit" : "$edit";
 
             return $this->Html->tableCells(
                 array_merge(array_map(function ($field) use ($controller, $displayField, $entity) {
                     return $field !== $displayField ? $this->display($entity->$field) :
-                        $this->Html->link(__($entity->$displayField),
-                            ['controller' => $controller, 'action' => 'view', $entity->id]);
+                        $this->Html->link(
+                            __($entity->$displayField),
+                            ['controller' => $controller, 'action' => 'view', $entity->id]
+                        );
                 }, $visibleFields), [$actions])
             );
         }, $entities);

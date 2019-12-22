@@ -67,8 +67,12 @@ class RequestSanitationMiddleware
                     // wipe out credit card
                     $replaced = $this->string_x_out($replaced, $match[1], $match[1] + strlen($match[0]), true);
                     // look for nearby expires and cvv
-                    $replaced = $this->string_x_out($replaced, max(0, $match[1] - 10),
-                        $match[1] + strlen($match[0]) + 30, false);
+                    $replaced = $this->string_x_out(
+                        $replaced,
+                        max(0, $match[1] - 10),
+                        $match[1] + strlen($match[0]) + 30,
+                        false
+                    );
                 }
             }
         }
@@ -86,7 +90,7 @@ class RequestSanitationMiddleware
         settype($number, 'string');
         $sumTable = [
             [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-            [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]
+            [0, 2, 4, 6, 8, 1, 3, 5, 7, 9],
         ];
         $sum = 0;
         $flip = 0;

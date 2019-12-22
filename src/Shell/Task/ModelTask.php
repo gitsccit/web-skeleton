@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Skeleton\Shell\Task;
 
@@ -14,7 +15,6 @@ use Cake\ORM\Table;
  */
 class ModelTask extends \Bake\Shell\Task\ModelTask
 {
-
     protected $_inaccessibleFields = ['created_at', 'modified_at', 'updated_at', 'deleted_at'];
     protected $_hiddenFields = ['id', 'token', 'password', 'passwd', 'deleted_at'];
 
@@ -107,7 +107,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
                 case $association instanceof BelongsToMany:
                     $assoc += [
                         'targetForeignKey' => $association->getTargetForeignKey(),
-                        'joinTable' => $association->junction()->getTable()
+                        'joinTable' => $association->junction()->getTable(),
                     ];
                     $type = 'belongsToMany';
                     break;
@@ -126,6 +126,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
         if (!empty($this->params['display-field'])) {
             return $this->params['display-field'];
         }
+
         return '';
     }
 
@@ -136,6 +137,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
 
             return array_values(array_filter(array_map('trim', $fields)));
         }
+
         return [];
     }
 
@@ -161,7 +163,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
             if ($entityClass === '\Cake\ORM\Entity') {
                 $namespace = Configure::read('App.namespace');
 
-                list($plugin,) = pluginSplit($association->getTarget()->getRegistryAlias());
+                [$plugin,] = pluginSplit($association->getTarget()->getRegistryAlias());
                 if ($plugin !== null) {
                     $namespace = $plugin;
                 }
@@ -174,7 +176,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
             $properties[$association->getProperty()] = [
                 'kind' => 'association',
                 'association' => $association,
-                'type' => $entityClass
+                'type' => $entityClass,
             ];
         }
 
@@ -237,8 +239,10 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
         }
 
         $validate = [];
-        $checkFields = array_merge(array_keys($model->getValidator()->getIterator()->getArrayCopy()),
-            $this->_inaccessibleFields);
+        $checkFields = array_merge(
+            array_keys($model->getValidator()->getIterator()->getArrayCopy()),
+            $this->_inaccessibleFields
+        );
         foreach ($checkFields as $fieldName) {
             if (in_array($fieldName, $foreignKeys)) {
                 continue;

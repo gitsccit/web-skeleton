@@ -20,7 +20,6 @@ use Cake\Utility\Inflector;
  */
 class CrudComponent extends Component
 {
-
     /**
      * Reference to the current controller.
      *
@@ -61,7 +60,7 @@ class CrudComponent extends Component
      * @var array
      */
     protected $_defaultConfig = [
-        'fallbackTemplatePath' => 'Common'
+        'fallbackTemplatePath' => 'Common',
     ];
 
     public function __construct(ComponentRegistry $registry, array $config = [])
@@ -106,7 +105,7 @@ class CrudComponent extends Component
         // set template
         $templateName = Inflector::underscore($this->_action) . '.php';
         $fallbackTemplatePath = $this->getConfig('fallbackTemplatePath');
-        list($plugin, $templateFolder) = pluginSplit($fallbackTemplatePath);
+        [$plugin, $templateFolder] = pluginSplit($fallbackTemplatePath);
         $basePath = is_null($plugin) ? App::path('templates')[0] : App::path('templates', $plugin)[0];
         if ($template) {
             $components = explode(DS, $template);
@@ -115,8 +114,10 @@ class CrudComponent extends Component
                 $this->_controller->viewBuilder()->setTemplatePath(implode(DS, $components));
             }
             $this->_controller->viewBuilder()->setTemplate($template);
-        } elseif (!file_exists(App::path('templates')[0] . $this->_viewPath() . $templateName)
-            && file_exists($basePath . $templateFolder . DS . $templateName)) {
+        } elseif (
+            !file_exists(App::path('templates')[0] . $this->_viewPath() . $templateName)
+            && file_exists($basePath . $templateFolder . DS . $templateName)
+        ) {
             $this->_controller->viewBuilder()->setTheme($plugin);
             $this->_controller->viewBuilder()->setTemplatePath($templateFolder);
         }
@@ -139,10 +140,13 @@ class CrudComponent extends Component
                 return $association->getName();
             }, $this->_table->associations()->getByType('BelongsTo'));
 
-            $entityFields = array_merge($this->_table->getSchema()->columns(),
-                array_map([Inflector::class, 'underscore'], $belongsTo));
+            $entityFields = array_merge(
+                $this->_table->getSchema()->columns(),
+                array_map([Inflector::class, 'underscore'], $belongsTo)
+            );
             $accessibleFields = array_filter($entityFields, function ($field) {
                 $entityClass = $this->_table->getEntityClass();
+
                 return (new $entityClass())->isAccessible($field);
             });
             $accessibleFields = array_combine($accessibleFields, array_fill(0, count($accessibleFields), []));
@@ -208,10 +212,12 @@ class CrudComponent extends Component
                                 break;
                             }
                         }
-                        $query->innerJoinWith($aliasOfCurrentTableOnAssociatedTable,
+                        $query->innerJoinWith(
+                            $aliasOfCurrentTableOnAssociatedTable,
                             function (Query $q) use ($aliasOfCurrentTableOnAssociatedTable, $entity) {
                                 return $q->where(["$aliasOfCurrentTableOnAssociatedTable.id" => $entity->id]);
-                            });
+                            }
+                        );
                     }
                     $queries[] = $query;
                 }
@@ -258,7 +264,7 @@ class CrudComponent extends Component
 
     /**
      * Serializes the response body, i.e. json/xml
-     * @param array|string|EntityInterface|ResultSetInterface $data
+     * @param array|string|\Cake\Datasource\EntityInterface|\Cake\Datasource\ResultSetInterface $data
      * @param int $status
      */
     public function serialize($data = [], $status = 200)
@@ -323,4 +329,3 @@ class CrudComponent extends Component
         }
     }
 }
-

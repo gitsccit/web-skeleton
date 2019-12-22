@@ -19,6 +19,7 @@ trait SoftDeleteTrait
     public function callFinder($type, Query $query, array $options = [])
     {
         $query->whereNull($this->getSoftDeleteField());
+
         return parent::callFinder($type, $query, $options);
     }
 
@@ -52,7 +53,7 @@ trait SoftDeleteTrait
 
         $event = $this->dispatchEvent('Model.beforeDelete', [
             'entity' => $entity,
-            'options' => $options
+            'options' => $options,
         ]);
 
         if ($event->isStopped()) {
@@ -78,7 +79,7 @@ trait SoftDeleteTrait
 
         $this->dispatchEvent('Model.afterDelete', [
             'entity' => $entity,
-            'options' => $options
+            'options' => $options,
         ]);
 
         return $success;
@@ -97,7 +98,7 @@ trait SoftDeleteTrait
     }
 
     /**
-     * @param EntityInterface $entity
+     * @param \Cake\Datasource\EntityInterface $entity
      * @return mixed
      */
     public function hardDelete(EntityInterface $entity)
@@ -122,12 +123,13 @@ trait SoftDeleteTrait
 
     /**
      * Restore a soft deleted entity into an active state.
-     * @param EntityInterface $entity Entity to be restored.
+     * @param \Cake\Datasource\EntityInterface $entity Entity to be restored.
      * @return bool true in case of success, false otherwise.
      */
     public function restore(EntityInterface $entity)
     {
         $entity->set($this->_softDeleteField, null);
+
         return $this->save($entity);
     }
 }

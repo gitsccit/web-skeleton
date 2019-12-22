@@ -19,7 +19,6 @@ use Skeleton\Listener\TableFilter;
  */
 class AppController extends Controller
 {
-
     /**
      * Settings for crud.
      *
@@ -75,10 +74,10 @@ class AppController extends Controller
 
     /**
      * @param string $error
-     * @param SecurityException|null $exception
+     * @param \Cake\Controller\Exception\SecurityException|null $exception
      * @return \Cake\Http\Response|null
      */
-    public function forceSSL($error = '', SecurityException $exception = null)
+    public function forceSSL($error = '', ?SecurityException $exception = null)
     {
         if ($exception instanceof SecurityException && $exception->getType() === 'secure') {
             return $this->redirect('https://' . env('SERVER_NAME') . Router::url($this->request->getRequestTarget()));

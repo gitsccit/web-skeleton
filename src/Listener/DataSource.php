@@ -11,13 +11,12 @@ use Cake\ORM\Query;
 
 class DataSource implements EventListenerInterface
 {
-
     public function implementedEvents(): array
     {
         return [
             'Model.beforeFind' => 'beforeFind',
             'Model.beforeSave' => 'beforeSave',
-            'Model.beforeDelete' => 'beforeDelete'
+            'Model.beforeDelete' => 'beforeDelete',
         ];
     }
 

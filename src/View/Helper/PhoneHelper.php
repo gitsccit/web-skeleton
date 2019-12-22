@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 /**
  * Phone Helper (https://github.com/PotatoPowered/phone-helper)
  *
@@ -35,8 +36,8 @@ class PhoneHelper extends Helper
      */
     protected $_defaultConfig = [
         'templates' => [
-            'phone' => '<a href="{{url}}"{{attrs}}>{{content}}</a>'
-        ]
+            'phone' => '<a href="{{url}}"{{attrs}}>{{content}}</a>',
+        ],
     ];
 
     /**
@@ -101,10 +102,11 @@ class PhoneHelper extends Helper
             $title = htmlentities($title, ENT_QUOTES, $escapeTitle);
         }
         $templater = $this->templater();
+
         return $templater->format('phone', [
             'url' => $url,
             'attrs' => $templater->formatAttributes($options),
-            'content' => $title
+            'content' => $title,
         ]);
     }
 
@@ -119,6 +121,7 @@ class PhoneHelper extends Helper
     public function buildUrl($url)
     {
         $number = preg_replace("/[^0-9]+/", "", $url);
+
         return "tel:+" . $number;
     }
 }

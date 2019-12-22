@@ -7,21 +7,21 @@
 ?>
 <div id="priority-table" class="table-responsive">
     <table id="data" class="table-list">
-        <?php if (!empty($priority)): ?>
+        <?php if (!empty($priority)) : ?>
             <colgroup>
-                <?php foreach ($priority as $p): ?>
+                <?php foreach ($priority as $p) : ?>
                     <col data-priority="<?= $p ?>"/>
                 <?php endforeach; ?>
             </colgroup>
         <?php endif; ?>
-        <?php if (!empty($thead)): ?>
+        <?php if (!empty($thead)) : ?>
             <thead>
             <?= $thead ?>
             </thead>
         <?php endif; ?>
-        <?php if (!empty($tbody)): ?>
+        <?php if (!empty($tbody)) : ?>
             <tbody>
-            <?php foreach ($tbody as $row): ?>
+            <?php foreach ($tbody as $row) : ?>
                 <?= $row ?>
             <?php endforeach; ?>
             </tbody>
