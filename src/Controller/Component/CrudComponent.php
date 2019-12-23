@@ -75,18 +75,19 @@ class CrudComponent extends Component
     {
         parent::initialize($config);
 
-        $this->_table = $this->_controller->{$this->_controller->getName()} ?? null;
         $this->_request = $this->_controller->getRequest();
         $this->_action = $this->_request->getParam('action');
+        $this->_serialized = $this->_request->is('json') || $this->_request->is('xml');
 
-        $acceptsContentTypes = $this->_request->accepts();
-        $this->_serialized = !empty(array_intersect(['application/json', 'application/xml'], $acceptsContentTypes))
-            && !in_array('text/html', $acceptsContentTypes);
+        $plugin = $this->_controller->getPlugin();
+        $modelClass = ($plugin ?  "$plugin." : '') . $this->_controller->getName();
+        $this->_table = App::className($modelClass, 'Model\Table', 'Table') ?
+            TableRegistry::getTableLocator()->get($modelClass) : null;
     }
 
     public function beforeRender(Event $event)
     {
-        $data = $this->_controller->viewVars;
+        $data = $this->_controller->viewBuilder()->getVars();
 
         if (isset($data['_serialize'])) {
             return $this->_controller->viewBuilder()->setClassName('Json');
@@ -158,6 +159,73 @@ class CrudComponent extends Component
 
         // set the extra view variables
         $this->_controller->set(compact('className', 'displayField', 'title'));
+    }
+
+    /**
+     * Serializes the response body, i.e. json/xml
+     * @param array|string|\Cake\Datasource\EntityInterface|\Cake\Datasource\ResultSetInterface $data
+     * @param int $status
+     */
+    public function serialize($data = [], $status = 200)
+    {
+        if (is_int($data) && 100 <= $data && $data < 600) {
+            $status = $data;
+            $data = [];
+        } elseif (is_string($data)) {
+            $data = ['message' => $data];
+        } elseif ($data instanceof EntityInterface || $data instanceof ResultSetInterface) {
+            $data = $data->toArray();
+        } elseif (!$data) {
+            $data = [];
+        }
+
+        $this->_controller->setResponse($this->_controller->getResponse()->withStatus($status));
+        $this->_controller->set(array_merge($data, ['_serialize' => array_keys($data)]));
+    }
+
+    /**
+     * Get the viewPath based on controller name and request prefix.
+     *
+     * @return string
+     */
+    protected function _viewPath()
+    {
+        $viewPath = $this->_controller->getName();
+        if ($this->_request->getParam('prefix')) {
+            $prefixes = array_map(
+                'Cake\Utility\Inflector::camelize',
+                explode('/', $this->_request->getParam('prefix'))
+            );
+            $viewPath = implode(DS, $prefixes) . DS . $viewPath;
+        }
+
+        return $viewPath . DS;
+    }
+
+    protected function _setFilterOptions()
+    {
+        if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
+            $filterOptions = [];
+            foreach ($entityClass::$filterable as $key => $field) {
+                // current table field
+                if (is_numeric($key)) {
+                    $filterOptions["{$this->_table->getAlias()}.$field"] = humanize($field);
+                    continue;
+                }
+
+                // associated table fields
+                $assoc = ucfirst($key);
+                if (!is_array($field)) {
+                    $field = [$field];
+                }
+
+                foreach ($field as $subField) {
+                    $value = Inflector::pluralize($assoc) . ".$subField";
+                    $filterOptions[$assoc][$value] = humanize($subField);
+                }
+            }
+            $this->_controller->set(compact('filterOptions'));
+        }
     }
 
     /**
@@ -260,72 +328,5 @@ class CrudComponent extends Component
         }
 
         return $resultSets;
-    }
-
-    /**
-     * Serializes the response body, i.e. json/xml
-     * @param array|string|\Cake\Datasource\EntityInterface|\Cake\Datasource\ResultSetInterface $data
-     * @param int $status
-     */
-    public function serialize($data = [], $status = 200)
-    {
-        if (is_int($data) && 100 <= $data && $data < 600) {
-            $status = $data;
-            $data = [];
-        } elseif (is_string($data)) {
-            $data = ['message' => $data];
-        } elseif ($data instanceof EntityInterface || $data instanceof ResultSetInterface) {
-            $data = $data->toArray();
-        } elseif (!$data) {
-            $data = [];
-        }
-
-        $this->_controller->setResponse($this->_controller->getResponse()->withStatus($status));
-        $this->_controller->set(array_merge($data, ['_serialize' => array_keys($data)]));
-    }
-
-    /**
-     * Get the viewPath based on controller name and request prefix.
-     *
-     * @return string
-     */
-    protected function _viewPath()
-    {
-        $viewPath = $this->_controller->getName();
-        if ($this->_request->getParam('prefix')) {
-            $prefixes = array_map(
-                'Cake\Utility\Inflector::camelize',
-                explode('/', $this->_request->getParam('prefix'))
-            );
-            $viewPath = implode(DS, $prefixes) . DS . $viewPath;
-        }
-
-        return $viewPath . DS;
-    }
-
-    protected function _setFilterOptions()
-    {
-        if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
-            $filterOptions = [];
-            foreach ($entityClass::$filterable as $key => $field) {
-                // current table field
-                if (is_numeric($key)) {
-                    $filterOptions["{$this->_table->getAlias()}.$field"] = humanize($field);
-                    continue;
-                }
-
-                // associated table fields
-                $assoc = ucfirst($key);
-                if (!is_array($field)) {
-                    $field = [$field];
-                }
-
-                foreach ($field as $subField) {
-                    $value = Inflector::pluralize($assoc) . ".$subField";
-                    $filterOptions[$assoc][$value] = humanize($subField);
-                }
-            }
-            $this->_controller->set(compact('filterOptions'));
-        }
     }
 }
