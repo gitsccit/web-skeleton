@@ -89,7 +89,7 @@ class CrudComponent extends Component
     {
         $data = $this->_controller->viewBuilder()->getVars();
 
-        if (isset($data['_serialize'])) {
+        if ($this->_controller->viewBuilder()->getOption('serialize')) {
             return $this->_controller->viewBuilder()->setClassName('Json');
         }
 
@@ -180,7 +180,8 @@ class CrudComponent extends Component
         }
 
         $this->_controller->setResponse($this->_controller->getResponse()->withStatus($status));
-        $this->_controller->set(array_merge($data, ['_serialize' => array_keys($data)]));
+        $this->_controller->set($data);
+        $this->_controller->viewBuilder()->setOption('serialize', array_keys($data));
     }
 
     /**
