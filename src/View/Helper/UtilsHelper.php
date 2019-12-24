@@ -59,9 +59,10 @@ class UtilsHelper extends Helper
      * Parses a list of entities into displayable table cells, with `Actions` as the last column.
      *
      * @param \Cake\ORM\Table|\Cake\Collection\CollectionInterface|array|string $entities A list of entities to be parsed, a table object, or the alias of the table.
+     * @param array $options - `actions`: A list of actions that the table will include, supports `view`, `edit`, `delete`, defaults to `view`, `edit`.
      * @return string
      */
-    public function createTable($entities)
+    public function createTable($entities, array $options = [])
     {
         if ($entities instanceof Table || is_string($entities)) {
             $table = is_string($entities) ? TableRegistry::getTableLocator()->get($entities) : $entities;
@@ -100,15 +101,21 @@ class UtilsHelper extends Helper
         }
 
         // construct the header of the table
+        $headers = array_map(function ($field) {
+            return $this->_View->Paginator->sort($field);
+        }, $visibleFields);
+
+        // add Action column if `actions` option is set
+        $allowedActions = $options['actions'] ?? ['view', 'edit'];
+        if ($allowedActions) {
+            $headers = array_merge($headers, ['Actions']);
+        }
+
         $this->_View->Paginator->defaultModel($table->getAlias());
-        $thead = $this->Html->tableHeaders(
-            array_merge(array_map(function ($field) {
-                return $this->_View->Paginator->sort($field);
-            }, $visibleFields), ['Actions'])
-        );
+        $thead = $this->Html->tableHeaders($headers);
 
         // construct the body of the table
-        $tbody = array_map(function (EntityInterface $entity) use ($controller, $displayField, $visibleFields) {
+        $tbody = array_map(function (EntityInterface $entity) use ($allowedActions, $controller, $displayField, $visibleFields) {
             $view = $this->Html->link(__('View'), ['controller' => $controller, 'action' => 'view', $entity->id]);
             $edit = $this->Html->link(
                 '<i class="icon-edit"></i>' . __('Edit'),
@@ -120,16 +127,30 @@ class UtilsHelper extends Helper
                 ['controller' => $controller, 'action' => 'delete', $entity->id],
                 ['confirm' => __('Are you sure you want to delete # {0}?', $entity->$displayField), 'escape' => false]
             );
-            $actions = $displayField === 'id' ? "$view | $edit" : "$edit";
+
+            // remove `view` button, use `displayField` as a hyperlink instead.
+            if ($displayField !== 'id') {
+                unset($allowedActions['view']);
+            }
+
+            // convert action name to links.
+            foreach ($allowedActions as $action) {
+                $actions[] = $$action;
+            }
+
+            // construct actions string
+            if ($actions = implode(' | ', $actions ?? [])) {
+                $visibleFields[] = $actions;
+            }
 
             return $this->Html->tableCells(
-                array_merge(array_map(function ($field) use ($controller, $displayField, $entity) {
+                array_map(function ($field) use ($controller, $displayField, $entity) {
                     return $field !== $displayField ? $this->display($entity->$field) :
                         $this->Html->link(
                             __($this->display($entity->$displayField)),
                             ['controller' => $controller, 'action' => 'view', $entity->id]
                         );
-                }, $visibleFields), [$actions])
+                }, $visibleFields)
             );
         }, $entities);
 
