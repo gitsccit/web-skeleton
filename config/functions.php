@@ -177,3 +177,26 @@ function humanize($string)
 {
     return Inflector::humanize(Inflector::underscore($string));
 }
+
+/**
+ * Prettify a phone number.
+ *
+ * This function can take either a 10 digit or 7 digit phone number and returns
+ * a more human readable version.
+ *
+ * @param int $number The phone number to be prettified
+ * @return string The prettified phone number
+ */
+function formatPhoneNumber($number)
+{
+    $number = preg_replace("/[^0-9]/", "", $number);
+    if (strlen($number) == 7) {
+        return preg_replace("/([0-9]{3})([0-9]{4})/", "$1-$2", $number);
+    } elseif (strlen($number) == 10) {
+        return preg_replace("/([0-9]{3})([0-9]{3})([0-9]{4})/", "($1) $2-$3", $number);
+    } elseif (strlen($number) == 11) {
+        return preg_replace("/([0-9]{1})([0-9]{3})([0-9]{3})([0-9]{4})/", "$1 ($2) $3 $4", $number);
+    } else {
+        return $number;
+    }
+}

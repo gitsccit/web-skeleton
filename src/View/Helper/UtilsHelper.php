@@ -33,7 +33,7 @@ class UtilsHelper extends Helper
     public function display($value)
     {
         if (is_numeric($value) && !is_string($value)) {
-            $value = $this->_View->Number->format($value);
+            $value = (string)$value;
         } elseif (is_bool($value)) {
             $value = $value ? __('Yes') : __('No');
         } elseif ($value instanceof EntityInterface) {
@@ -78,7 +78,10 @@ class UtilsHelper extends Helper
             }
             $entity = $entities[0];
             $table = TableRegistry::getTableLocator()->get($entity->getSource());
-            $visibleFields = array_keys($entity->toArray());
+            $visibleFields = array_filter(array_keys($entity->toArray()), function ($field) use ($entity) {
+                // remove array fields, they can't be displayed in a table
+                return !is_array($entity->$field);
+            });
         } else {
             throw new \RuntimeException('Entities have an invalid type: ' . get_class($entities));
         }
@@ -123,7 +126,7 @@ class UtilsHelper extends Helper
                 array_merge(array_map(function ($field) use ($controller, $displayField, $entity) {
                     return $field !== $displayField ? $this->display($entity->$field) :
                         $this->Html->link(
-                            __($entity->$displayField),
+                            __($this->display($entity->$displayField)),
                             ['controller' => $controller, 'action' => 'view', $entity->id]
                         );
                 }, $visibleFields), [$actions])
