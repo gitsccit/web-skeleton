@@ -130,7 +130,8 @@ class UtilsHelper extends Helper
 
             // remove `view` button, use `displayField` as a hyperlink instead.
             if ($displayField !== 'id') {
-                unset($allowedActions['view']);
+                $key = array_search('view', $allowedActions);
+                unset($allowedActions[$key]);
             }
 
             // convert action name to links.
@@ -138,20 +139,20 @@ class UtilsHelper extends Helper
                 $actions[] = $$action;
             }
 
+            $cells = array_map(function ($field) use ($controller, $displayField, $entity) {
+                return $field !== $displayField ? $this->display($entity->$field) :
+                    $this->Html->link(
+                        __($this->display($entity->$displayField)),
+                        ['controller' => $controller, 'action' => 'view', $entity->id]
+                    );
+            }, $visibleFields);
+
             // construct actions string
             if ($actions = implode(' | ', $actions ?? [])) {
-                $visibleFields[] = $actions;
+                $cells[] = $actions;
             }
 
-            return $this->Html->tableCells(
-                array_map(function ($field) use ($controller, $displayField, $entity) {
-                    return $field !== $displayField ? $this->display($entity->$field) :
-                        $this->Html->link(
-                            __($this->display($entity->$displayField)),
-                            ['controller' => $controller, 'action' => 'view', $entity->id]
-                        );
-                }, $visibleFields)
-            );
+            return $this->Html->tableCells($cells);
         }, $entities);
 
         return $this->_View->element('Skeleton.table', compact('thead', 'tbody', 'priority'));
