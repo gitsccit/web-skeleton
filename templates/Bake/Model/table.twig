@@ -25,7 +25,7 @@ class {{ name }}Table extends {{ override ? "\\#{theme}\\Model\\Table\\#{name}Ta
      * @param array $config The configuration for the Table.
      * @return void
      */
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         parent::initialize($config);
 {% if table or displayField or primaryKey %}
@@ -65,8 +65,10 @@ class {{ name }}Table extends {{ override ? "\\#{theme}\\Model\\Table\\#{name}Ta
 {%- for type, assocs in associations %}
     {%- for assoc in assocs %}
         {%- set assocData = [] %}
-        {%- for key, val in assoc if key is not same as('alias') %}
-            {%- set assocData = assocData|merge({(key): val}) %}
+        {%- for key, val in assoc %}
+            {%- if key is not same as('alias') %}
+                {%- set assocData = assocData|merge({(key): val}) %}
+            {%- endif %}
         {%- endfor %}
         $this->{{ type }}('{{ assoc.alias }}', [{{ Bake.stringifyList(assocData, {'indent': 3})|raw }}]);
         {{- "\n" }}
@@ -83,7 +85,7 @@ class {{ name }}Table extends {{ override ? "\\#{theme}\\Model\\Table\\#{name}Ta
      * @param \Cake\Validation\Validator $validator Validator instance.
      * @return \Cake\Validation\Validator
      */
-    public function validationDefault(Validator $validator)
+    public function validationDefault(Validator $validator): Validator
     {
 {% if override %}
         parent::validationDefault($validator);
@@ -115,7 +117,7 @@ class {{ name }}Table extends {{ override ? "\\#{theme}\\Model\\Table\\#{name}Ta
      * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
      * @return \Cake\ORM\RulesChecker
      */
-    public function buildRules(RulesChecker $rules)
+    public function buildRules(RulesChecker $rules): RulesChecker
     {
 {% if override %}
         parent::buildRules($rules);
@@ -136,7 +138,7 @@ class {{ name }}Table extends {{ override ? "\\#{theme}\\Model\\Table\\#{name}Ta
      *
      * @return string
      */
-    public static function defaultConnectionName()
+    public static function defaultConnectionName(): string
     {
         return '{{ connection }}';
     }

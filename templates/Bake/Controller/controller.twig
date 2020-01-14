@@ -17,7 +17,7 @@ namespace {{ namespace }}\Controller{{ prefix }};
 
 {%- if 'index' in actions %}
  *
- * @method \{{ namespace }}\Model\Entity\{{ entityClassName }}[]
+ * @method \{{ namespace }}\Model\Entity\{{ entityClassName }}[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
 {% endif %}
  */
 class {{ name }}Controller extends {{ override ? "\\#{theme}\\Controller\\#{name}Controller" : 'AppController' }}
