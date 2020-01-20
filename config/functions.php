@@ -166,7 +166,7 @@ function random_string($length = 32)
  */
 function generate_token($length = 256)
 {
-    return substr(bin2hex(openssl_random_pseudo_bytes(ceil($length / 2))), 0, $length);
+    return substr(bin2hex(openssl_random_pseudo_bytes((int)ceil($length / 2))), 0, $length);
 }
 
 /**
