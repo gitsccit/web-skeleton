@@ -28,10 +28,10 @@ class RequestSanitationMiddleware
     {
         $body = $request->getParsedBody();
         foreach ($body as $key => $value) {
-            if (in_array($key, $this->creditCardFields)) {
+            if (!is_string($value) || !is_numeric($value) || in_array($key, $this->creditCardFields)) {
                 continue;
             }
-            $body[$key] = $this->sanitize($value);
+            $body[$key] = $this->sanitize((string)$value);
         }
         $request = $request->withParsedBody($body);
 
