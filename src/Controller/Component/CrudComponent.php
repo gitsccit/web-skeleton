@@ -80,7 +80,7 @@ class CrudComponent extends Component
         $this->_serialized = $this->_request->is(['json', 'xml']);
 
         $plugin = $this->_controller->getPlugin();
-        $modelClass = ($plugin ?  "$plugin." : '') . $this->_controller->getName();
+        $modelClass = ($plugin ? "$plugin." : '') . $this->_controller->getName();
         $this->_table = App::className($modelClass, 'Model\Table', 'Table') ?
             TableRegistry::getTableLocator()->get($modelClass) : null;
     }
@@ -208,22 +208,21 @@ class CrudComponent extends Component
         if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
             $filterOptions = [];
             foreach ($entityClass::$filterable as $key => $field) {
-                // current table field
-                if (is_numeric($key)) {
-                    $filterOptions["{$this->_table->getAlias()}.$field"] = humanize($field);
-                    continue;
+                if (is_numeric($key)) { // e.g. 0 => 'title'
+                    $key = $field;
                 }
 
-                // associated table fields
-                $assoc = ucfirst($key);
-                if (!is_array($field)) {
-                    $field = [$field];
+                if (!strpos($key, '__')) { // e.g. 'first_name'
+                    $value = $key; // 'first_name'
+                    $key = "{$this->_table->getAlias()}__$value"; // 'Users__first_name'
+                } else {  // e.g. turn 'Users__first_name' to 'User First Name'
+                    $parts = explode('__', $key);
+                    $parts[0] = Inflector::singularize($parts[0]);
+                    $value = implode(' ', $parts);
                 }
 
-                foreach ($field as $subField) {
-                    $value = Inflector::pluralize($assoc) . ".$subField";
-                    $filterOptions[$assoc][$value] = humanize($subField);
-                }
+                $value = humanize($value);
+                $filterOptions[$key] = $value;
             }
             $this->_controller->set(compact('filterOptions'));
         }
