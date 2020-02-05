@@ -47,6 +47,11 @@ class TableFilter implements EventListenerInterface
         $tableName = $table->getAlias();
         $entityClass = $table->getEntityClass();
 
+        // filter for current table is not enabled
+        if (!isset($entityClass::$filterable)) {
+            return $event;
+        }
+
         // TODO: Delete this code block when query param is implememnted in UI.
         if (($filter = $queryParams['filter'] ?? null) && ($key = $queryParams['key'] ?? null)) {
             $queryParams[$filter] = $key;
