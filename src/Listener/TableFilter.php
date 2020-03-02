@@ -72,6 +72,13 @@ class TableFilter implements EventListenerInterface
                     $key = $value;
                     $value = [$this->_defaultOperation];
                 }
+
+                // prefix current table fields with current able name, i.e. "name" -> "Users__name"
+                if (!strpos($key, '__')) {
+                    $key = "{$tableName}__$key";
+                }
+
+                // lowercase the keys
                 $filterable[strtolower($key)] = $value;
             }
 
