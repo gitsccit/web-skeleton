@@ -100,6 +100,11 @@ class TableFilter implements EventListenerInterface
                     $sqlOperation = $this->_operationLookup[$this->_defaultOperation];
                 }
 
+                // current table fields. e.g. turn ['name'] to ['users', 'name']
+                if (count($fields) === 1) {
+                    array_unshift($fields, strtolower($table->getAlias()));
+                }
+
                 // check if the operation is permitted on this field.
                 $param = implode('__', $fields);
                 $allowedOperations = $filterable[$param] ?? [];
@@ -111,11 +116,6 @@ class TableFilter implements EventListenerInterface
 
                 if (!in_array($operation, $allowedOperations)) {
                     throw new BadRequestException("Operation '$operation' is not permitted on $param.");
-                }
-
-                // current table fields. e.g. turn ['name'] to ['users', 'name']
-                if (count($fields) === 1) {
-                    array_unshift($fields, strtolower($table->getAlias()));
                 }
 
                 // construct sql field, e.g. 'users.name'
