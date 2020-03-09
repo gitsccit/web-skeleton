@@ -125,6 +125,16 @@ class TableFilter implements EventListenerInterface
                     $value = "%$value%";
                 }
 
+                // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'
+                if ($value === 'NULL') {
+                    if ($sqlOperation === '=') {
+                        $sqlOperation = 'IS';
+                    } elseif ($sqlOperation === '!=') {
+                        $sqlOperation = 'IS NOT';
+                    }
+                    $value = null;
+                }
+
                 $query->where(["$sqlField $sqlOperation" => $value]);
             }
         }
