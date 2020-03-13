@@ -48,8 +48,8 @@ class UtilsHelper extends Helper
             $value = $this->_View->Time->format($value, null, null, $timezone);
         } elseif (empty($value)) {
             $value = "—";
-        } elseif (is_string($value) && $value === strip_tags($value)) {
-            $value = __(h($value));
+        } elseif (is_string($value)) {
+            $value = __($value);
         }
 
         return $value;
