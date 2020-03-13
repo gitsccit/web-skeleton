@@ -16,7 +16,7 @@ use Cake\ORM\Table;
 class ModelTask extends \Bake\Shell\Task\ModelTask
 {
     protected $_inaccessibleFields = ['created_at', 'modified_at', 'updated_at', 'deleted_at'];
-    protected $_hiddenFields = ['id', 'token', 'password', 'passwd', 'deleted_at'];
+    protected $_hiddenFields = ['token', 'password', 'passwd', 'deleted_at'];
 
     /**
      * Generate code for the given model name.
@@ -314,12 +314,7 @@ class ModelTask extends \Bake\Shell\Task\ModelTask
         $schema = $model->getSchema();
         $columns = $schema->columns();
 
-        $hiddenFields = array_filter($columns, function ($field) {
-            return endsWith($field, '_id');
-        });
-        $hiddenFields = array_merge($hiddenFields, $this->_hiddenFields);
-
-        return array_values(array_intersect($columns, $hiddenFields));
+        return array_values(array_intersect($columns, $this->_hiddenFields));
     }
 
     public function getValidation($model, $associations = [])
