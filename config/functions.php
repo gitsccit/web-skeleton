@@ -200,3 +200,20 @@ function formatPhoneNumber($number)
         return $number;
     }
 }
+
+/**
+ * Flattens a multidimensional array into one array.
+ *
+ * @param array $array
+ * @return array
+ */
+function array_flatten(array $array)
+{
+    $result = [];
+
+    array_walk_recursive($array, function ($a) use (&$result) {
+        $result[] = $a;
+    });
+
+    return $result;
+}

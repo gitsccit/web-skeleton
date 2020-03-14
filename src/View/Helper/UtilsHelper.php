@@ -49,6 +49,10 @@ class UtilsHelper extends Helper
         } elseif (empty($value)) {
             $value = "—";
         } elseif (is_string($value)) {
+            // add word break after '@', so long email addresses will wrap
+            if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                str_replace('@', '@<wbr>', $value);
+            }
             $value = __($value);
         }
 
