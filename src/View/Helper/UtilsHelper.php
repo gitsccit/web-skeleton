@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace Skeleton\View\Helper;
 
-use Cake\Collection\CollectionInterface;
 use Cake\Datasource\EntityInterface;
-use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Cake\View\Helper;
 
@@ -17,14 +15,13 @@ use Cake\View\Helper;
  */
 class UtilsHelper extends Helper
 {
+    public $helpers = ['Form', 'Html'];
     /**
      * Default configuration.
      *
      * @var array
      */
     protected $_defaultConfig = [];
-
-    public $helpers = ['Form', 'Html'];
 
     /**
      * @param mixed $value
@@ -38,10 +35,11 @@ class UtilsHelper extends Helper
             $value = $value ? __('Yes') : __('No');
         } elseif ($value instanceof EntityInterface) {
             $table = TableRegistry::getTableLocator()->get($value->getSource());
-            [$plugin, ] = pluginSplit($table->getRegistryAlias());
+            [$plugin,] = pluginSplit($table->getRegistryAlias());
+            $prefix = method_exists($table, 'getPrefix') ? $table->getPrefix() : '';
             $value = $this->Html->link(
                 __($value->{$table->getDisplayField()}),
-                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'plugin' => $plugin]
+                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'prefix' => $prefix, 'plugin' => $plugin]
             );
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
