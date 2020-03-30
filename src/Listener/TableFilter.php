@@ -121,11 +121,9 @@ class TableFilter implements EventListenerInterface
 
                 // get the associations. e.g. ['articles', 'tags'] for 'Articles__Tags__name'.
                 $associations = array_slice($fields, 0, -1);
-                $field = end($fields);
 
                 // construct sql field, e.g. 'tags.name'.
-                $associationString = implode('.', $associations);
-                $sqlField = end($associations) . ".$field";
+                $sqlField = implode('.', array_slice($fields, -2));
 
                 if ($sqlOperation === 'LIKE') {
                     $value = "%$value%";
@@ -141,16 +139,39 @@ class TableFilter implements EventListenerInterface
                     $value = null;
                 }
 
-                // filter many to many relationship
-                if ($table->hasAssociation($associationString) && $table->getAssociation($associationString) instanceof BelongsToMany) {
-                    $query->innerJoinWith($associationString, function ($q) use ($sqlField, $sqlOperation, $value) {
-                        return $q->where(["$sqlField $sqlOperation" => $value]);
-                    });
-                    continue;
-                }
-
-                $query->contain($associationString)->where(["$sqlField $sqlOperation" => $value]);
+                // construct query
+                $this->updateQuery($query, $associations, ["$sqlField $sqlOperation" => $value]);
             }
         }
+    }
+
+    protected function updateQuery(Query $query, array $associations, array $condition)
+    {
+        $table = $query->getRepository();
+
+        $association = array_shift($associations);
+
+        // apply the condition if there's no more associations to join with.
+        if (!$association) {
+            return $query->where($condition);
+        }
+
+        // add many to many joins
+        if ($table->hasAssociation($association) && $table->getAssociation($association) instanceof BelongsToMany) {
+            return $query->innerJoinWith($association, function (Query $q) use ($associations, $condition) {
+                return $this->updateQuery($q, $associations, $condition);
+            });
+        }
+
+        // simple joins
+        if (strcasecmp($table->getRegistryAlias(), $association) !== 0) {
+            return $query->contain([
+                $association => function (Query $q) use ($associations, $condition) {
+                    return $this->updateQuery($q, $associations, $condition);
+                }
+            ]);
+        }
+
+        return $this->updateQuery($query, $associations, $condition);
     }
 }
