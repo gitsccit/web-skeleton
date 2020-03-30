@@ -6,6 +6,7 @@ namespace Skeleton\Listener;
 use Cake\Event\Event;
 use Cake\Event\EventListenerInterface;
 use Cake\Http\Exception\BadRequestException;
+use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Query;
 
 class TableFilter implements EventListenerInterface
@@ -133,6 +134,14 @@ class TableFilter implements EventListenerInterface
                         $sqlOperation = 'IS NOT';
                     }
                     $value = null;
+                }
+
+                // filter many to many relationship
+                if ($table->hasAssociation($fields[0]) && $table->getAssociation($fields[0]) instanceof BelongsToMany) {
+                    $query->innerJoinWith($fields[0], function ($q) use ($sqlField, $sqlOperation, $value) {
+                        return $q->where(["$sqlField $sqlOperation" => $value]);
+                    });
+                    continue;
                 }
 
                 $query->where(["$sqlField $sqlOperation" => $value]);
