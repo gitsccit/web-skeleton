@@ -101,7 +101,7 @@ class TableFilter implements EventListenerInterface
                     $sqlOperation = $this->_operationLookup[$this->_defaultOperation];
                 }
 
-                // current table fields. e.g. turn ['name'] to ['users', 'name']
+                // current table fields. e.g. turn ['name'] to ['users', 'name'].
                 if (count($fields) === 1) {
                     array_unshift($fields, strtolower($table->getAlias()));
                 }
@@ -119,14 +119,19 @@ class TableFilter implements EventListenerInterface
                     throw new BadRequestException("Operation '$operation' is not permitted on $param.");
                 }
 
-                // construct sql field, e.g. 'users.name'
-                $sqlField = implode('.', $fields);
+                // get the associations. e.g. ['articles', 'tags'] for 'Articles__Tags__name'.
+                $associations = array_slice($fields, 0, -1);
+                $field = end($fields);
+
+                // construct sql field, e.g. 'tags.name'.
+                $associationString = implode('.', $associations);
+                $sqlField = end($associations) . ".$field";
 
                 if ($sqlOperation === 'LIKE') {
                     $value = "%$value%";
                 }
 
-                // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'
+                // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'.
                 if ($value === 'NULL') {
                     if ($sqlOperation === '=') {
                         $sqlOperation = 'IS';
@@ -137,14 +142,14 @@ class TableFilter implements EventListenerInterface
                 }
 
                 // filter many to many relationship
-                if ($table->hasAssociation($fields[0]) && $table->getAssociation($fields[0]) instanceof BelongsToMany) {
-                    $query->innerJoinWith($fields[0], function ($q) use ($sqlField, $sqlOperation, $value) {
+                if ($table->hasAssociation($associationString) && $table->getAssociation($associationString) instanceof BelongsToMany) {
+                    $query->innerJoinWith($associationString, function ($q) use ($sqlField, $sqlOperation, $value) {
                         return $q->where(["$sqlField $sqlOperation" => $value]);
                     });
                     continue;
                 }
 
-                $query->where(["$sqlField $sqlOperation" => $value]);
+                $query->contain($associationString)->where(["$sqlField $sqlOperation" => $value]);
             }
         }
     }

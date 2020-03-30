@@ -212,13 +212,15 @@ class CrudComponent extends Component
                     $key = $field;
                 }
 
-                if (!strpos($key, '__')) { // e.g. 'first_name'
+                $fields = explode('__', $key);
+                if (count($fields) === 1) { // e.g. 'first_name'
                     $value = $key; // 'first_name'
                     $key = "{$this->_table->getAlias()}__$value"; // 'Users__first_name'
                 } else {  // e.g. turn 'Users__first_name' to 'User First Name'
-                    $parts = explode('__', $key);
-                    $parts[0] = Inflector::singularize($parts[0]);
-                    $value = implode(' ', $parts);
+                    $field = array_pop($fields);
+                    $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
+                    $fields = array_merge($associations, [$field]);
+                    $value = implode(' ', $fields);
                 }
 
                 $value = humanize($value);
