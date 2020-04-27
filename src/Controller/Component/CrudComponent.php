@@ -231,6 +231,39 @@ class CrudComponent extends Component
     }
 
     /**
+     * Helper method to reproduce contain for associations. (For paginating associations)
+     * By default Cake converts find('all', ['contain' => ['Users' => ['limit' => 5]]]) to ['Users' => ['limit' => [5 => []]]],
+     * This method converts it back to ['Users' => ['limit' => 5]]].
+     *
+     * @param array $contain
+     * @return array|mixed
+     */
+    protected function _formatContain(array $contain)
+    {
+        $result = [];
+
+        foreach ($contain as $field => $value) {
+            if ($field === 'fields') {
+                $result[$field] = $value;
+                continue;
+            }
+
+            if (empty($value)) {
+                $result[] = $field;
+                continue;
+            }
+
+            $result[$field] = $this->_formatContain($value);
+        }
+
+        if (!is_assoc($result) && count($result) === 1) {
+            $result = $result[0];
+        }
+
+        return $result;
+    }
+
+    /**
      * Handles pagination of records in Table objects as well as their associations.
      *
      * Will load the referenced Table object, and have the PaginatorComponent
@@ -271,7 +304,7 @@ class CrudComponent extends Component
                 // if association is in original 'contain'
                 if (isset($contain[$association->getName()])) {
                     $nestedContain = $contain[$association->getName()] ?? [];
-                    $query = $associatedTable->find()->contain($nestedContain);
+                    $query = $associatedTable->find('all', $this->_formatContain($nestedContain));
 
                     if ($association instanceof Association\HasMany) {
                         $query->where(["{$associatedTable->getAlias()}.{$association->getForeignKey()}" => $entity->id]);
