@@ -53,6 +53,11 @@ class TableFilter implements EventListenerInterface
             return $event;
         }
 
+        // skip functions that are not index
+        if ($this->_controller->getRequest()->getParam('action') !== 'index') {
+            return $event;
+        }
+
         // TODO: Delete this code block when query param is implememnted in UI.
         if (($filter = $queryParams['filter'] ?? null) && ($key = $queryParams['key'] ?? null)) {
             $queryParams[$filter] = $key;
