@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace {{ namespace }}\Controller{{ prefix }};
 
+{% if plugin or prefix %}
+use {{ baseNamespace }}\Controller\AppController;
+
+{% endif %}
 /**
  * {{ name }} Controller
  *
@@ -16,36 +20,32 @@ namespace {{ namespace }}\Controller{{ prefix }};
 {% endfor %}
 
 {%- if 'index' in actions %}
- *
  * @method \{{ namespace }}\Model\Entity\{{ entityClassName }}[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
 {% endif %}
  */
 class {{ name }}Controller extends {{ override ? "\\#{theme}\\Controller\\#{name}Controller" : 'AppController' }}
 {
-//    public $crud = [
-//        'fallbackTemplatePath' => 'Common'
-//    ];
-{% if actions %}
+{% if components or helpers %}
+    /**
+     * Initialize controller
+     *
+     * @return void
+     */
+    public function initialize(): void
+    {
+        parent::initialize();
 
+{% for component in components %}
+        $this->loadComponent('{{ component }}');
+    {% endfor %}
+{% if helpers %}
+    $this->viewBuilder()->setHelpers([{{ Bake.stringifyList(helpers, {'indent': false})|raw }}]);
 {% endif %}
-{% set helpers = Bake.arrayProperty('helpers', helpers, {'indent': false})|raw %}
-{% if helpers|trim %}
-    {{- helpers|raw }}
-{% if components %}
-
-{% endif %}
-{% endif %}
-{%- set components = Bake.arrayProperty('components', components, {'indent': false})|raw %}
-{% if components|trim %}
-    {{- components|raw }}
-{% if actions %}
-
-{% endif %}
+    }
+{% if actions|length %}{{ "\n" }}{% endif %}
 {% endif %}
 {%- for action in actions %}
-{% if loop.index > 1 %}
-
-{% endif %}
-    {%- element 'Controller/' ~ action %}
+    {% if loop.index > 1 %}{{ "\n" }}{% endif %}
+    {{- element('Bake.Controller/' ~ action) -}}
 {% endfor %}
 }
