@@ -11,6 +11,13 @@
      */
     public function view($id = null)
     {
+{% if 'api' in {{ prefix }}|lower %}
+        ${{ singularName }} = $this->{{ currentModelName }}->get($id, [
+            'contain' => [{{ Bake.stringifyList(allAssociations, {'indent': false})|raw }}],
+        ]);
+
+        $this->set('{{ singularName }}', ${{ singularName }});
+{% else %}
         $query = $this->{{ currentModelName }}->find('all', [
             'contain' => [{{ Bake.stringifyList(allAssociations, {'indent': false})|raw }}],
             'conditions' => ['{{ currentModelName }}.id' => $id]
@@ -18,4 +25,5 @@
 
         $results = $this->Crud->paginateAssociations($query);
         $this->set($results);
+{% endif %}
     }
