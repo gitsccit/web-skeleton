@@ -24,7 +24,7 @@
     {
         $this->request->allowMethod(['post', 'delete']);
         ${{ singularName }} = $this->{{ currentModelName }}->get($id);
-{% if 'api' in {{ prefix }}|lower %}
+{% if 'api' in prefix|lower %}
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
             return $this->response->withStatus(204);
         }

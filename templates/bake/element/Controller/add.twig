@@ -21,7 +21,7 @@
      */
     public function add()
     {
-{% if 'api' in {{ prefix }}|lower %}
+{% if 'api' in prefix|lower %}
         $this->request->allowMethod('post');
         ${{ singularName }} = $this->{{ currentModelName }}->newEmptyEntity();
         ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
@@ -30,8 +30,7 @@
 
             return $this->response->withStatus(200);
         }
-        $message = ${{ singularName }}->getErrors();
-        $this->set(compact('message'));
+        $this->set('message', ${{ singularName }}->getErrors());
 
         return $this->response->withStatus(400);
 {% else %}

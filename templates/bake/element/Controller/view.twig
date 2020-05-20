@@ -11,7 +11,7 @@
      */
     public function view($id = null)
     {
-{% if 'api' in {{ prefix }}|lower %}
+{% if 'api' in prefix|lower %}
         ${{ singularName }} = $this->{{ currentModelName }}->get($id, [
             'contain' => [{{ Bake.stringifyList(allAssociations, {'indent': false})|raw }}],
         ]);
