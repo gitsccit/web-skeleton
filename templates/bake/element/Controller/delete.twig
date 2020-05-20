@@ -28,8 +28,7 @@
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
             return $this->response->withStatus(204);
         }
-        $message = ${{ singularName }}->getErrors();
-        $this->set(compact('message'));
+        $this->set('message', ${{ singularName }}->getErrors());
 
         return $this->response->withStatus(400);
 {% else %}
