@@ -217,3 +217,18 @@ function array_flatten(array $array)
 
     return $result;
 }
+
+/**
+ * Find folder names matching a pattern
+ *
+ * @param $pattern
+ * @return array|string[]
+ */
+function get_subfolder_names($pattern)
+{
+    return array_map(function ($dir) {
+        $arr = explode('/', $dir);
+
+        return array_pop($arr);
+    }, glob($pattern, GLOB_ONLYDIR));
+}

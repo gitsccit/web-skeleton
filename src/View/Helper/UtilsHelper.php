@@ -5,6 +5,7 @@ namespace Skeleton\View\Helper;
 
 use Cake\Datasource\EntityInterface;
 use Cake\ORM\TableRegistry;
+use Cake\Routing\Router;
 use Cake\View\Helper;
 
 /**
@@ -36,10 +37,17 @@ class UtilsHelper extends Helper
         } elseif ($value instanceof EntityInterface) {
             $table = TableRegistry::getTableLocator()->get($value->getSource());
             [$plugin,] = pluginSplit($table->getRegistryAlias());
-            $prefix = method_exists($table, 'getPrefix') ? $table->getPrefix() : '';
+            $prefix = $this->_View->getRequest()->getParam('prefix');
+            $controller = $table->getTable();
+            if (!class_exists("App\Controller\\$prefix\\${controller}Controller")) {
+                $prefixes = get_subfolder_names(APP . 'Controller/*');;
+                $prefix = array_filter($prefixes, function ($prefix) use ($controller) {
+                    return Router::routeExists(compact('controller', 'prefix'));
+                })[0] ?? null;
+            }
             $value = $this->Html->link(
                 __($value->{$table->getDisplayField()}),
-                ['controller' => $table->getTable(), 'action' => 'view', $value->id, 'prefix' => $prefix, 'plugin' => $plugin]
+                ['controller' => $controller, 'action' => 'view', $value->id, 'prefix' => $prefix, 'plugin' => $plugin]
             );
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
