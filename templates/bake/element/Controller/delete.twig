@@ -26,10 +26,11 @@
         ${{ singularName }} = $this->{{ currentModelName }}->get($id);
 {% if 'api' in prefix|lower %}
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
-            return $this->response->withStatus(204);
+            $this->response = $this->response->withStatus(200);
+        } else {
+            $this->set('message', ${{ singularName }}->getErrors());
+            $this->response = $this->response->withStatus(400);
         }
-        $this->set('message', ${{ singularName }}->getErrors());
-        $this->response = $this->response->withStatus(400);
 {% else %}
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
             $this->Flash->success(__('The {{ singularHumanName|lower }} has been deleted.'));
