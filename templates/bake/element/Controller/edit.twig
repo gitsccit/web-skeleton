@@ -33,7 +33,6 @@
         ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
         if ($this->{{ currentModelName }}->save(${{ singularName }})) {
             $this->set(compact('{{ singularName }}'));
-            $this->response = $this->response->withStatus(200);
         } else {
             $this->set('message', ${{ singularName }}->getErrors());
             $this->response = $this->response->withStatus(400);
