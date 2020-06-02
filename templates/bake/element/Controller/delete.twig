@@ -29,8 +29,7 @@
             return $this->response->withStatus(204);
         }
         $this->set('message', ${{ singularName }}->getErrors());
-
-        return $this->response->withStatus(400);
+        $this->response = $this->response->withStatus(400);
 {% else %}
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {
             $this->Flash->success(__('The {{ singularHumanName|lower }} has been deleted.'));

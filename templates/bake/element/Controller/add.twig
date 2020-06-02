@@ -27,12 +27,11 @@
         ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
         if ($this->{{ currentModelName }}->save(${{ singularName }})) {
             $this->set(compact('{{ singularName }}'));
-
-            return $this->response->withStatus(200);
+            $this->response = $this->response->withStatus(200);
+        } else {
+            $this->set('message', ${{ singularName }}->getErrors());
+            $this->response = $this->response->withStatus(400);
         }
-        $this->set('message', ${{ singularName }}->getErrors());
-
-        return $this->response->withStatus(400);
 {% else %}
         ${{ singularName }} = $this->{{ currentModelName }}->newEmptyEntity();
         if ($this->request->is('post')) {
