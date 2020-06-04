@@ -35,13 +35,6 @@ class CrudComponent extends Component
     protected $_table;
 
     /**
-     * Reference to the current request.
-     *
-     * @var \Cake\Http\ServerRequest
-     */
-    protected $_request;
-
-    /**
      * The current controller action.
      *
      * @var string
@@ -75,9 +68,9 @@ class CrudComponent extends Component
     {
         parent::initialize($config);
 
-        $this->_request = $this->_controller->getRequest();
-        $this->_action = $this->_request->getParam('action');
-        $this->_serialized = $this->_request->is(['json', 'xml']);
+        $request = $this->_controller->getRequest();
+        $this->_action = $request->getParam('action');
+        $this->_serialized = $request->is(['json', 'xml']);
 
         $plugin = $this->_controller->getPlugin();
         $modelClass = ($plugin ? "$plugin." : '') . $this->_controller->getName();
@@ -192,10 +185,12 @@ class CrudComponent extends Component
     protected function _viewPath()
     {
         $viewPath = $this->_controller->getName();
-        if ($this->_request->getParam('prefix')) {
+        $request = $this->_controller->getRequest();
+
+        if ($request->getParam('prefix')) {
             $prefixes = array_map(
                 'Cake\Utility\Inflector::camelize',
-                explode('/', $this->_request->getParam('prefix'))
+                explode('/', $request->getParam('prefix'))
             );
             $viewPath = implode(DS, $prefixes) . DS . $viewPath;
         }
@@ -206,27 +201,45 @@ class CrudComponent extends Component
     protected function _setFilterOptions()
     {
         if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
-            $filterOptions = [];
-            foreach ($entityClass::$filterable as $key => $field) {
+            $filterNames = $entityClass::$filterNames ?? [];
+            $filterOperations = [];
+            $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
+
+            foreach ($entityClass::$filterable as $key => $operations) {
                 if (is_numeric($key)) { // e.g. 0 => 'title'
-                    $key = $field;
+                    $key = $operations;
+                    $operations = null;
                 }
 
-                $fields = explode('__', $key);
-                if (count($fields) === 1) { // e.g. 'first_name'
-                    $value = $key; // 'first_name'
-                    $key = "{$this->_table->getAlias()}__$value"; // 'Users__first_name'
-                } else {  // e.g. turn 'Users__first_name' to 'User First Name'
-                    $field = array_pop($fields);
-                    $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
-                    $fields = array_merge($associations, [$field]);
-                    $value = implode(' ', $fields);
+                // filter names
+                if (!isset($filterNames[$key])) {
+                    $fields = explode('__', $key);
+                    if (count($fields) === 1) { // e.g. 'first_name'
+                        $value = $key; // 'first_name'
+                        $key = "{$this->_table->getAlias()}__$value"; // 'Users__first_name'
+                    } else {  // e.g. turn 'Users__first_name' to 'User First Name'
+                        $field = array_pop($fields);
+                        $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
+                        $fields = array_merge($associations, [$field]);
+                        $value = implode(' ', $fields);
+                    }
+
+                    $value = humanize($value);
+                    $filterNames[$key] = $value;
                 }
 
-                $value = humanize($value);
-                $filterOptions[$key] = $value;
+                // filter options
+                if (!isset($filterOptions[$key])) {
+                    $filterOptions[$key] = null;
+                }
+
+                // filter operations
+                $filterOperations[$key] = $operations;
             }
-            $this->_controller->set(compact('filterOptions'));
+            $selectedFilters = $this->_controller->getRequest()->getQueryParams();
+            $selectedFilters = empty($selectedFilters) ? [array_keys($filterOperations)[0] => null] : $selectedFilters;
+
+            $this->_controller->set(compact('filterNames', 'filterOperations', 'filterOptions', 'selectedFilters'));
         }
     }
 

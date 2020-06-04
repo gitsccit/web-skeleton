@@ -38,11 +38,11 @@ class UtilsHelper extends Helper
             $table = TableRegistry::getTableLocator()->get($value->getSource());
             [$plugin,] = pluginSplit($table->getRegistryAlias());
             $prefix = $this->_View->getRequest()->getParam('prefix');
-            $controller = $table->getTable();
+            $controller = ucfirst($table->getTable());
             if (!class_exists("App\Controller\\$prefix\\${controller}Controller")) {
                 $prefixes = get_subfolder_names(APP . 'Controller/*');;
                 $prefix = array_filter($prefixes, function ($prefix) use ($controller) {
-                    return Router::routeExists(compact('controller', 'prefix'));
+                    return class_exists("App\Controller\\$prefix\\${controller}Controller");
                 })[0] ?? null;
             }
             $value = $this->Html->link(
