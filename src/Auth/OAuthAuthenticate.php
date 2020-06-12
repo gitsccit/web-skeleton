@@ -3,10 +3,6 @@ declare(strict_types=1);
 
 namespace Skeleton\Auth;
 
-use Skeleton\Auth\Exception\InvalidProviderException;
-use Skeleton\Auth\Exception\InvalidSettingsException;
-use Skeleton\Auth\Exception\MissingEventListenerException;
-use Skeleton\Auth\Exception\MissingProviderConfigurationException;
 use Cake\Auth\BaseAuthenticate;
 use Cake\Controller\ComponentRegistry;
 use Cake\Core\Configure;
@@ -16,6 +12,10 @@ use Cake\Http\ServerRequest;
 use Cake\Utility\Hash;
 use Exception;
 use League\OAuth2\Client\Provider\AbstractProvider;
+use Skeleton\Auth\Exception\InvalidProviderException;
+use Skeleton\Auth\Exception\InvalidSettingsException;
+use Skeleton\Auth\Exception\MissingEventListenerException;
+use Skeleton\Auth\Exception\MissingProviderConfigurationException;
 
 class OAuthAuthenticate extends BaseAuthenticate
 {

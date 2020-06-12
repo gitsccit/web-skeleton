@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Skeleton\Auth\Exception;
 
 use Cake\Core\Exception\Exception;

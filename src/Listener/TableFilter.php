@@ -69,7 +69,6 @@ class TableFilter implements EventListenerInterface
 
         // prevent adding conditions on subqueries.
         if ($controllerName === $tableName && $primary) {
-
             // retrieve and lowercase all filterable entries for case-insensitive query param comparison.
             // Permitted operations are set in `$filterable` in the model's entity class.
             $filterable = [];
@@ -173,7 +172,7 @@ class TableFilter implements EventListenerInterface
             return $query->contain([
                 $association => function (Query $q) use ($associations, $condition) {
                     return $this->updateQuery($q, $associations, $condition);
-                }
+                },
             ]);
         }
 
