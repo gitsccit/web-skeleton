@@ -6,7 +6,6 @@ namespace Skeleton\Listener;
 use Cake\Event\Event;
 use Cake\Event\EventListenerInterface;
 use Cake\Http\Exception\BadRequestException;
-use Cake\ORM\Association\BelongsToMany;
 use Cake\ORM\Query;
 
 class TableFilter implements EventListenerInterface
@@ -69,6 +68,7 @@ class TableFilter implements EventListenerInterface
 
         // prevent adding conditions on subqueries.
         if ($controllerName === $tableName && $primary) {
+
             // retrieve and lowercase all filterable entries for case-insensitive query param comparison.
             // Permitted operations are set in `$filterable` in the model's entity class.
             $filterable = [];
@@ -156,24 +156,15 @@ class TableFilter implements EventListenerInterface
         $association = array_shift($associations);
 
         // apply the condition if there's no more associations to join with.
-        if (!$association) {
+        if (!$association || (count($associations) === 1 && strtolower($table->getRegistryAlias()) === $association)) {
             return $query->where($condition);
         }
 
-        // add many to many joins
-        if ($table->hasAssociation($association) && $table->getAssociation($association) instanceof BelongsToMany) {
+        // add joins
+        if ($table->hasAssociation($association)) {
             return $query->innerJoinWith($association, function (Query $q) use ($associations, $condition) {
                 return $this->updateQuery($q, $associations, $condition);
             });
-        }
-
-        // simple joins
-        if (strcasecmp($table->getRegistryAlias(), $association) !== 0) {
-            return $query->contain([
-                $association => function (Query $q) use ($associations, $condition) {
-                    return $this->updateQuery($q, $associations, $condition);
-                },
-            ]);
         }
 
         return $this->updateQuery($query, $associations, $condition);
