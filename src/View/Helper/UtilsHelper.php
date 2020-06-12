@@ -41,7 +41,6 @@ class UtilsHelper extends Helper
             $controller = Inflector::camelize($table->getTable());
             if (!class_exists("App\Controller\\$prefix\\${controller}Controller")) {
                 $prefixes = get_subfolder_names(APP . 'Controller/*');
-
                 $prefix = array_filter($prefixes, function ($prefix) use ($controller) {
                         return class_exists("App\Controller\\$prefix\\${controller}Controller");
                 })[0] ?? null;
