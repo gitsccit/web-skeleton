@@ -59,7 +59,7 @@ class CrudComponent extends Component
     public function __construct(ComponentRegistry $registry, array $config = [])
     {
         $this->_controller = $registry->getController();
-        $config = $this->_controller->crud ?? $config;
+        $config = isset($this->_controller->crud) ? $this->_controller->crud : $config;
 
         parent::__construct($registry, $config);
     }
