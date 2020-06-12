@@ -124,7 +124,7 @@ class TableFilter implements EventListenerInterface
                 }
 
                 // get the associations. e.g. ['articles', 'tags'] for 'Articles__Tags__name'.
-                $associations = array_slice($fields, 0, -1);
+                $association = implode('.', array_slice($fields, 0, -1));
 
                 // construct sql field, e.g. 'tags.name'.
                 $sqlField = implode('.', array_slice($fields, -2));
@@ -144,29 +144,12 @@ class TableFilter implements EventListenerInterface
                 }
 
                 // construct query
-                $this->updateQuery($query, $associations, ["$sqlField $sqlOperation" => $value]);
+                if ($table->hasAssociation($association)) {
+                    $query->innerJoinWith($association);
+                }
+
+                $query->where(["$sqlField $sqlOperation" => $value]);
             }
         }
-    }
-
-    protected function updateQuery(Query $query, array $associations, array $condition)
-    {
-        $table = $query->getRepository();
-
-        $association = array_shift($associations);
-
-        // apply the condition if there's no more associations to join with.
-        if (!$association || (count($associations) === 1 && strtolower($table->getRegistryAlias()) === $association)) {
-            return $query->where($condition);
-        }
-
-        // add joins
-        if ($table->hasAssociation($association)) {
-            return $query->innerJoinWith($association, function (Query $q) use ($associations, $condition) {
-                return $this->updateQuery($q, $associations, $condition);
-            });
-        }
-
-        return $this->updateQuery($query, $associations, $condition);
     }
 }
