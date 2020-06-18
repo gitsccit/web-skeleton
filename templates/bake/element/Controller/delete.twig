@@ -26,8 +26,7 @@
         ${{ singularName }} = $this->{{ currentModelName }}->get($id);
 {% if 'api' in prefix|lower %}
         if (!$this->{{ currentModelName }}->delete(${{ singularName }})) {
-            $this->set('message', ${{ singularName }}->getErrors());
-            $this->response = $this->response->withStatus(400);
+            $this->Crud->serialize(['message' => ${{ singularName }}->getErrors()], 400);
         }
 {% else %}
         if ($this->{{ currentModelName }}->delete(${{ singularName }})) {

@@ -16,7 +16,7 @@
             'contain' => [{{ Bake.stringifyList(allAssociations, {'indent': false})|raw }}],
         ]);
 
-        $this->set('{{ singularName }}', ${{ singularName }});
+        $this->Crud->serialize(compact('{{ singularName }}'));
 {% else %}
         $query = $this->{{ currentModelName }}->find('all', [
             'contain' => [{{ Bake.stringifyList(allAssociations, {'indent': false})|raw }}],

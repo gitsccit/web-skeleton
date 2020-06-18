@@ -26,10 +26,9 @@
         ${{ singularName }} = $this->{{ currentModelName }}->newEmptyEntity();
         ${{ singularName }} = $this->{{ currentModelName }}->patchEntity(${{ singularName }}, $this->request->getData());
         if ($this->{{ currentModelName }}->save(${{ singularName }})) {
-            $this->set(compact('{{ singularName }}'));
+            $this->Crud->serialize(compact('{{ singularName }}'));
         } else {
-            $this->set('message', ${{ singularName }}->getErrors());
-            $this->response = $this->response->withStatus(400);
+            $this->Crud->serialize(['message' => ${{ singularName }}->getErrors()], 400);
         }
 {% else %}
         ${{ singularName }} = $this->{{ currentModelName }}->newEmptyEntity();
