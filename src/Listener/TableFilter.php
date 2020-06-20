@@ -57,15 +57,6 @@ class TableFilter implements EventListenerInterface
             return $event;
         }
 
-        // TODO: Delete this code block when query param is implememnted in UI.
-        if (($filter = $queryParams['filter'] ?? null) && ($key = $queryParams['key'] ?? null)) {
-            $queryParams[$filter] = $key;
-            if ($operation = $queryParams['filter'] ?? null) {
-                $filter = "{$filter}__$operation";
-            }
-            unset($queryParams['filter'], $queryParams['key']);
-        }
-
         // prevent adding conditions on subqueries.
         if ($controllerName === $tableName && $primary) {
 
