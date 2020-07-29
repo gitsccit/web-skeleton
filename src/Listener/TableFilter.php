@@ -60,7 +60,7 @@ class TableFilter implements EventListenerInterface
         // prevent adding conditions on subqueries.
         if ($controllerName === $tableName && $primary) {
 
-            // retrieve and lowercase all filterable entries for case-insensitive query param comparison.
+            // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
             // Permitted operations are set in `$filterable` in the model's entity class.
             $filterable = [];
             foreach ($entityClass::$filterable as $key => $value) {
@@ -74,31 +74,28 @@ class TableFilter implements EventListenerInterface
                     $key = "{$tableName}__$key";
                 }
 
-                // lowercase the keys
-                $filterable[strtolower($key)] = $value;
+                $filterable[$key] = $value;
             }
 
             // add the `and` conditions. e.g. WHERE ... AND `name` LIKE "%James%" AND `age` <= 23.
             foreach ($queryParams as $param => $value) {
-                $param = strtolower($param);
-
-                // get the fields in the query param, i.e. ['users', 'age', 'lt'] for 'users__age__lt'.
+                // get the fields in the query param, i.e. ['Users', 'age', 'lt'] for 'Users__age__lt'.
                 $fields = explode('__', $param);
 
                 // find the sql operation for the operation. i.e. 'lt' => '<', 'contains' => 'LIKE', etc.
                 $operation = array_pop($fields);
                 $sqlOperation = $this->_operationLookup[$operation] ?? null;
 
-                // not recognized operation, treat as nested relationship. e.g. 'name' in 'users__name'.
+                // not recognized operation, treat as entity field. e.g. 'name' in 'Users__name'.
                 if (!$sqlOperation) {
                     $fields[] = $operation;
                     $operation = $this->_defaultOperation;
                     $sqlOperation = $this->_operationLookup[$this->_defaultOperation];
                 }
 
-                // current table fields. e.g. turn ['name'] to ['users', 'name'].
+                // current table fields. e.g. turn ['name'] to ['Users', 'name'].
                 if (count($fields) === 1) {
-                    array_unshift($fields, strtolower($table->getAlias()));
+                    array_unshift($fields, $table->getAlias());
                 }
 
                 // check if the operation is permitted on this field.
@@ -114,10 +111,10 @@ class TableFilter implements EventListenerInterface
                     throw new BadRequestException("Operation '$operation' is not permitted on $param.");
                 }
 
-                // get the associations. e.g. ['articles', 'tags'] for 'Articles__Tags__name'.
+                // get the associations. e.g. ['Articles', 'Tags'] for 'Articles__Tags__name'.
                 $association = implode('.', array_slice($fields, 0, -1));
 
-                // construct sql field, e.g. 'tags.name'.
+                // construct sql field, e.g. 'Tags.name'.
                 $sqlField = implode('.', array_slice($fields, -2));
 
                 if ($sqlOperation === 'LIKE') {
