@@ -247,6 +247,8 @@ function get_file_extension_from_mime_type($mimeType)
         'text/html' => '.html',
         'text/javascript' => '.js',
         'text/plain' => '.txt',
+        'image/svg' => '.svg',
+        'image/svg+xml' => '.svg',
         'application/x-authorware-bin' => '.aab',
         'application/x-authorware-map' => '.aam',
         'application/x-authorware-seg' => '.aas',
