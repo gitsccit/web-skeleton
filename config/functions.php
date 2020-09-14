@@ -243,12 +243,15 @@ function get_file_extension_from_mime_type($mimeType)
 {
     $map = [
         'image/jpeg' => '.jpg',
+        'image/jpg' => '.jpg',
         'image/png' => '.png',
+        'image/svg' => '.svg',
+        'image/svg+xml' => '.svg',
+        'image/tiff' => '.tiff',
         'text/html' => '.html',
         'text/javascript' => '.js',
         'text/plain' => '.txt',
-        'image/svg' => '.svg',
-        'image/svg+xml' => '.svg',
+        'application/json' => '.json',
         'application/x-authorware-bin' => '.aab',
         'application/x-authorware-map' => '.aam',
         'application/x-authorware-seg' => '.aas',
