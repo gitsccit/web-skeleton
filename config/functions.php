@@ -248,6 +248,8 @@ function get_file_extension_from_mime_type($mimeType)
         'image/svg' => '.svg',
         'image/svg+xml' => '.svg',
         'image/tiff' => '.tiff',
+        'image/bmp' => '.bmp',
+        'image/vnd.microsoft.icon' => '.ico',
         'text/html' => '.html',
         'text/javascript' => '.js',
         'text/plain' => '.txt',
