@@ -33,6 +33,9 @@ Add these urls to `app.php` or `app_local.php`.
       'apps' => '...', // App server url, this could be dev/test/prod.
       'refreshCallback' => '...',  // The endpoint that App server will call when an update is detected, defaults to '/pages/clear-cache'.
   ],
+  Security => [
+      'appServerApiToken' => '...' // The token used to access App server API.
+  ],
   ```
 
 ### Bake
