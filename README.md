@@ -27,7 +27,7 @@ include CRUD operations, file handling, HTTP request logging, soft-deletion, aut
 ### ApiHandler
 The API client of the Application Server, this contains methods to communicate with the App Server.
 
-Add these urls to `app.php` or `app_local.php`.
+Add these entries to `app_local.php`.
   ```
   Urls => [
       'apps' => '...', // App server url, this could be dev/test/prod.
