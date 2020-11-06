@@ -24,6 +24,17 @@ include CRUD operations, file handling, HTTP request logging, soft-deletion, aut
 
 ## Usage
 
+### ApiHandler
+The API client of the Application Server, this contains methods to communicate with the App Server.
+
+Add these urls to `app.php` or `app_local.php`.
+  ```
+  Urls => [
+      'apps' => '...', // App server url, this could be dev/test/prod.
+      'refreshCallback' => '...',  // The endpoint that App server will call when an update is detected, defaults to '/pages/clear-cache'.
+  ],
+  ```
+
 ### Bake
 
 Use option `-t Skeleton` when baking. E.g.
@@ -31,7 +42,7 @@ Use option `-t Skeleton` when baking. E.g.
 
 ### Behaviors
 
-#### CurrentUser
+##### CurrentUser
 For all incoming save request, this behavior sets `user_id` in request data to `Session::read('Auth.User.id')`.
 
 ### Crud
