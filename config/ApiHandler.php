@@ -26,7 +26,7 @@ class ApiHandler
     public function __construct(array $config = [])
     {
         $this->_client = new Client([
-            'headers' => ['scctoken' => Configure::read('Security.APPS_TOKEN'), 'Accept' => 'application/json'],
+            'headers' => ['scctoken' => Configure::read('Security.appServerApiToken'), 'Accept' => 'application/json'],
         ]);
         $this->_baseUrl = Configure::read('Urls.apps');
         $this->_refresh_callback_url = Router::url(Configure::read('Urls.refreshCallback', '/pages/clear-cache'), true);
