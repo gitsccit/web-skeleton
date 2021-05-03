@@ -19,7 +19,7 @@ class ApiHandler
 
     protected $_environmentId;
 
-    protected $_cacheConfig = 'apps';
+    protected $_cacheConfig = 'default';
 
     protected $_refresh_callback_url;
 
