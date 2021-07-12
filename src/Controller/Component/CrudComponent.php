@@ -148,7 +148,7 @@ class CrudComponent extends Component
         }
 
         // set $filterableFields if $filterable is set for the entity
-        $this->_setFilterOptions();
+        $this->setFilterOptions();
 
         // set the extra view variables
         $this->_controller->set(compact('className', 'displayField', 'title'));
@@ -178,29 +178,15 @@ class CrudComponent extends Component
     }
 
     /**
-     * Get the viewPath based on controller name and request prefix.
+     * Sets `$filterNames`, `$filterOperations`, `$filterOptions`, `$selectedFilters` as view variables based on
+     * the `$filterable` property defined in the entity class.
      *
-     * @return string
+     * @param null $entityClass The entity class of the table that you want to filter
      */
-    protected function _viewPath()
+    public function setFilterOptions($entityClass = null)
     {
-        $viewPath = $this->_controller->getName();
-        $request = $this->_controller->getRequest();
-
-        if ($request->getParam('prefix')) {
-            $prefixes = array_map(
-                'Cake\Utility\Inflector::camelize',
-                explode('/', $request->getParam('prefix'))
-            );
-            $viewPath = implode(DS, $prefixes) . DS . $viewPath;
-        }
-
-        return $viewPath . DS;
-    }
-
-    protected function _setFilterOptions()
-    {
-        if (($entityClass = $this->_table->getEntityClass()) && property_exists($entityClass, 'filterable')) {
+        $entityClass = $entityClass ?? $this->_table->getEntityClass();
+        if ($entityClass && property_exists($entityClass, 'filterable')) {
             $filterNames = $entityClass::$filterNames ?? [];
             $filterOperations = [];
             $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
@@ -241,6 +227,27 @@ class CrudComponent extends Component
 
             $this->_controller->set(compact('filterNames', 'filterOperations', 'filterOptions', 'selectedFilters'));
         }
+    }
+
+    /**
+     * Get the viewPath based on controller name and request prefix.
+     *
+     * @return string
+     */
+    protected function _viewPath()
+    {
+        $viewPath = $this->_controller->getName();
+        $request = $this->_controller->getRequest();
+
+        if ($request->getParam('prefix')) {
+            $prefixes = array_map(
+                'Cake\Utility\Inflector::camelize',
+                explode('/', $request->getParam('prefix'))
+            );
+            $viewPath = implode(DS, $prefixes) . DS . $viewPath;
+        }
+
+        return $viewPath . DS;
     }
 
     /**
