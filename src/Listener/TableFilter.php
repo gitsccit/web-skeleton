@@ -46,6 +46,7 @@ class TableFilter implements EventListenerInterface
         $table = $event->getSubject();
         $tableName = $table->getAlias();
         $entityClass = $table->getEntityClass();
+        $action = $this->_controller->getRequest()->getParam('action');
 
         // filter for current table is not enabled
         if (!isset($entityClass::$filterable)) {
@@ -53,7 +54,9 @@ class TableFilter implements EventListenerInterface
         }
 
         // skip functions that are not index
-        if ($this->_controller->getRequest()->getParam('action') !== 'index') {
+        $filterFields = $this->_controller->filterFields ?? ['index'];
+        $filterableActions = is_assoc($filterFields) ? array_keys($filterFields) : $filterFields;
+        if (in_array($action, $filterableActions)) {
             return $event;
         }
 
@@ -62,7 +65,7 @@ class TableFilter implements EventListenerInterface
 
             // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
             // Permitted operations are set in `$filterable` in the model's entity class.
-            $filterable = [];
+            $filterable = $filterFields[$action] ?? [];
             foreach ($entityClass::$filterable as $key => $value) {
                 if (is_numeric($key)) {
                     $key = $value;
