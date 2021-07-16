@@ -181,16 +181,28 @@ class CrudComponent extends Component
      * Sets `$filterNames`, `$filterOperations`, `$filterOptions`, `$selectedFilters` as view variables based on
      * the `$filterable` property defined in the entity class.
      *
-     * @param null $entityClass The entity class of the table that you want to filter
+     * @param Table|string|null $tableClass The class of the table that you want to filter
      */
-    public function setFilterOptions($entityClass = null)
+    public function setFilterOptions($tableClass = null)
     {
-        $entityClass = $entityClass ?? $this->_table->getEntityClass();
+        if (is_null($tableClass)) {
+            $table = $this->_table;
+        } elseif (is_string($tableClass)) {
+            $table = new $tableClass();
+        } else {
+            $table = $tableClass;
+        }
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException('$tableClass must be a string or an instance of the table class');
+        }
+
+        $entityClass = $table->getEntityClass();
         if ($entityClass && property_exists($entityClass, 'filterable')) {
             $filterNames = $entityClass::$filterNames ?? [];
             $filterOperations = [];
             $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
-            $tableName = (new $entityClass())->getSource();
+            $tableName = $table->getAlias();
 
             foreach ($entityClass::$filterable as $key => $operations) {
                 if (is_numeric($key)) { // e.g. 0 => 'title'
