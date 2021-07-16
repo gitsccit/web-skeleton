@@ -190,6 +190,7 @@ class CrudComponent extends Component
             $filterNames = $entityClass::$filterNames ?? [];
             $filterOperations = [];
             $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
+            $tableName = (new $entityClass)->getSource();
 
             foreach ($entityClass::$filterable as $key => $operations) {
                 if (is_numeric($key)) { // e.g. 0 => 'title'
@@ -202,7 +203,7 @@ class CrudComponent extends Component
                     $fields = explode('__', $key);
                     if (count($fields) === 1) { // e.g. 'first_name'
                         $value = $key; // 'first_name'
-                        $key = "{$this->_table->getAlias()}__$value"; // 'Users__first_name'
+                        $key = "{$tableName}__$value"; // 'Users__first_name'
                     } else {  // e.g. turn 'Users__first_name' to 'User First Name'
                         $field = array_pop($fields);
                         $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
