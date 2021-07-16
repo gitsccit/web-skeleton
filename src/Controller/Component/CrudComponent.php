@@ -148,7 +148,9 @@ class CrudComponent extends Component
         }
 
         // set $filterableFields if $filterable is set for the entity
-        $this->setFilterOptions();
+        if (!isset($filterName)) {
+            $this->setFilterOptions();
+        }
 
         // set the extra view variables
         $this->_controller->set(compact('className', 'displayField', 'title'));
