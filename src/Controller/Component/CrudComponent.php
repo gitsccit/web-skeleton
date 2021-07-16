@@ -148,7 +148,7 @@ class CrudComponent extends Component
         }
 
         // set $filterableFields if $filterable is set for the entity
-        if (!$this->_controller->viewBuilder()->hasVar('filterName')) {
+        if (!$this->_controller->viewBuilder()->hasVar('filterNames')) {
             $this->setFilterOptions();
         }
 
