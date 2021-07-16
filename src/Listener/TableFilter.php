@@ -55,7 +55,13 @@ class TableFilter implements EventListenerInterface
 
         // skip functions that are not index
         $filterFields = isset($this->_controller->filterFields) ? $this->_controller->filterFields : ['index'];
-        $filterableActions = is_assoc($filterFields) ? array_keys($filterFields) : $filterFields;
+        foreach ($filterFields as $key => $value) {
+            if (is_numeric($key)) {
+                $filterFields[$value] = [];
+                unset($filterFields[$key]);
+            }
+        }
+        $filterableActions = array_keys($filterFields);
         if (!in_array($action, $filterableActions)) {
             return $event;
         }

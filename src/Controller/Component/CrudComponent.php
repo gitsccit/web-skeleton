@@ -205,7 +205,9 @@ class CrudComponent extends Component
             $filterOperations = [];
             $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
             $tableName = $table->getAlias();
-            $filterFields = isset($this->_controller->filterFields) ? $this->_controller->filterFields[$this->_action] : $entityClass::$filterable;
+            $filterFields = isset($this->_controller->filterFields) ?
+                ($this->_controller->filterFields[$this->_action] ?? $entityClass::$filterable) :
+                $entityClass::$filterable;
 
             foreach ($filterFields as $key => $operations) {
                 if (is_numeric($key)) { // e.g. 0 => 'title'
