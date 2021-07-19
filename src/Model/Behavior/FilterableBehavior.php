@@ -160,7 +160,7 @@ class FilterableBehavior extends Behavior
         foreach ($filterFields as $key => $operations) {
             if (is_numeric($key)) { // e.g. 0 => 'title'
                 $key = $operations;
-                $operations = [$this->_defaultOperation];
+                $operations = null;
             }
 
             // filter names
