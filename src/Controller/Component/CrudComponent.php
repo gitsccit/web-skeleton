@@ -147,11 +147,6 @@ class CrudComponent extends Component
             $this->_controller->set(compact('accessibleFields'));
         }
 
-        // set $filterableFields if $filterable is set for the entity
-        if (!$this->_controller->viewBuilder()->hasVar('filterNames')) {
-            $this->setFilterOptions();
-        }
-
         // set the extra view variables
         $this->_controller->set(compact('className', 'displayField', 'title'));
     }
@@ -177,74 +172,6 @@ class CrudComponent extends Component
         $this->_controller->setResponse($this->_controller->getResponse()->withStatus($status));
         $this->_controller->set($data);
         $this->_controller->viewBuilder()->setOption('serialize', array_keys($data));
-    }
-
-    /**
-     * Sets `$filterNames`, `$filterOperations`, `$filterOptions`, `$selectedFilters` as view variables based on
-     * the `$filterable` property defined in the entity class.
-     *
-     * @param Table|string|null $tableClass The class of the table that you want to filter
-     */
-    public function setFilterOptions($tableClass = null)
-    {
-        if (is_null($tableClass)) {
-            $table = $this->_table;
-        } elseif (is_string($tableClass)) {
-            $table = new $tableClass();
-        } else {
-            $table = $tableClass;
-        }
-
-        if (!$table instanceof Table) {
-            throw new \InvalidArgumentException('$tableClass must be a string or an instance of the table class');
-        }
-
-        $entityClass = $table->getEntityClass();
-        if ($entityClass && property_exists($entityClass, 'filterable')) {
-            $filterNames = $entityClass::$filterNames ?? [];
-            $filterOperations = [];
-            $filterOptions = $this->_controller->viewBuilder()->getVar('filterOptions') ?? [];
-            $tableName = $table->getAlias();
-            $filterFields = isset($this->_controller->filterFields) ?
-                ($this->_controller->filterFields[$this->_action] ?? $entityClass::$filterable) :
-                $entityClass::$filterable;
-
-            foreach ($filterFields as $key => $operations) {
-                if (is_numeric($key)) { // e.g. 0 => 'title'
-                    $key = $operations;
-                    $operations = null;
-                }
-
-                // filter names
-                if (!isset($filterNames[$key])) {
-                    $fields = explode('__', $key);
-                    if (count($fields) === 1) { // e.g. 'first_name'
-                        $value = $key; // 'first_name'
-                        $key = "{$tableName}__$value"; // 'Users__first_name'
-                    } else {  // e.g. turn 'Users__first_name' to 'User First Name'
-                        $field = array_pop($fields);
-                        $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
-                        $fields = array_merge($associations, [$field]);
-                        $value = implode(' ', $fields);
-                    }
-
-                    $value = humanize($value);
-                    $filterNames[$key] = $value;
-                }
-
-                // filter options
-                if (!isset($filterOptions[$key])) {
-                    $filterOptions[$key] = null;
-                }
-
-                // filter operations
-                $filterOperations[$key] = $operations;
-            }
-            $selectedFilters = $this->_controller->getRequest()->getQueryParams();
-            $selectedFilters = empty($selectedFilters) ? [array_keys($filterOperations)[0] => null] : $selectedFilters;
-
-            $this->_controller->set(compact('filterNames', 'filterOperations', 'filterOptions', 'selectedFilters'));
-        }
     }
 
     /**

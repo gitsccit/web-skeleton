@@ -1,19 +1,30 @@
 <?php
 declare(strict_types=1);
 
-namespace Skeleton\Listener;
+namespace Skeleton\Model\Behavior;
 
 use Cake\Event\Event;
-use Cake\Event\EventListenerInterface;
 use Cake\Http\Exception\BadRequestException;
+use Cake\ORM\Behavior;
 use Cake\ORM\Query;
+use Cake\ORM\Table;
+use Cake\Routing\Router;
 
-class TableFilter implements EventListenerInterface
+/**
+ * Filterable behavior
+ */
+class FilterableBehavior extends Behavior
 {
     /**
-     * @var \Cake\Controller\Controller
+     * Default configuration.
+     *
+     * @var array
      */
-    protected $_controller;
+    protected $_defaultConfig = [
+        'restricted' => true,
+    ];
+
+    protected $_request;
 
     protected $_operationLookup = [
         'contains' => 'LIKE',
@@ -27,41 +38,23 @@ class TableFilter implements EventListenerInterface
 
     protected $_defaultOperation = 'contains';
 
-    public function __construct($controller)
+    public function __construct(Table $table, array $config = [])
     {
-        $this->_controller = $controller;
-    }
+        parent::__construct($table, $config);
 
-    public function implementedEvents(): array
-    {
-        return [
-            'Model.beforeFind' => 'beforeFind',
-        ];
+        $this->_request = Router::getRequest();
     }
 
     public function beforeFind(Event $event, Query $query, \ArrayObject $options, $primary)
     {
-        $queryParams = $this->_controller->getRequest()->getQueryParams();
+        $filterFields = $this->getConfigOrFail('fields');
+        $queryParams = $this->_request->getQueryParams();
         $table = $event->getSubject();
         $tableName = $table->getAlias();
-        $entityClass = $table->getEntityClass();
-        $action = $this->_controller->getRequest()->getParam('action');
+        $action = $this->_request->getParam('action');
 
-        // filter for current table is not enabled
-        if (!isset($entityClass::$filterable)) {
-            return $event;
-        }
-
-        // skip functions that are not index
-        $filterFields = isset($this->_controller->filterFields) ? $this->_controller->filterFields : ['index'];
-        foreach ($filterFields as $key => $value) {
-            if (is_numeric($key)) {
-                $filterFields[$value] = [];
-                unset($filterFields[$key]);
-            }
-        }
-        $filterableActions = array_keys($filterFields);
-        if (!in_array($action, $filterableActions)) {
+        // skip if filtering for this controller action is not enabled.
+        if ($action !== 'index' && $this->getConfig('restricted')) {
             return $event;
         }
 
@@ -71,10 +64,8 @@ class TableFilter implements EventListenerInterface
         }
 
         // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
-        // Permitted operations are set in `$filterable` in the model's entity class.
-        $filterable = $filterFields[$action] ?? $entityClass::$filterable ?? [];
-        foreach ($filterable as $key => $value) {
-            unset($filterable[$key]);
+        foreach ($filterFields as $key => $value) {
+            unset($filterFields[$key]);
 
             if (is_numeric($key)) {
                 $key = $value;
@@ -86,7 +77,7 @@ class TableFilter implements EventListenerInterface
                 $key = "{$tableName}__$key";
             }
 
-            $filterable[$key] = $value;
+            $filterFields[$key] = $value;
         }
 
         // add the `and` conditions. e.g. WHERE ... AND `name` LIKE "%James%" AND `age` <= 23.
@@ -112,10 +103,10 @@ class TableFilter implements EventListenerInterface
 
             // check if the operation is permitted on this field.
             $param = implode('__', $fields);
-            $allowedOperations = $filterable[$param] ?? [];
+            $allowedOperations = $filterFields[$param] ?? [];
 
             // skip unrecognized query params
-            if (!isset($filterable[$param])) {
+            if (!isset($filterFields[$param])) {
                 continue;
             }
 
@@ -150,5 +141,51 @@ class TableFilter implements EventListenerInterface
 
             $query->where(["$sqlField $sqlOperation" => $value]);
         }
+
+        return $event;
+    }
+
+    /**
+     * Sets `$filterNames`, `$filterOperations`, `$selectedFilters` as view variables
+     *
+     * @param Table|string|null $tableClass The class of the table that you want to filter
+     */
+    public function getFilterVariables()
+    {
+        $filterFields = $this->getConfigOrFail('fields');
+        $filterNames = $this->getConfig('names', []);
+        $filterOperations = [];
+        $tableName = $this->_table->getAlias();
+
+        foreach ($filterFields as $key => $operations) {
+            if (is_numeric($key)) { // e.g. 0 => 'title'
+                $key = $operations;
+                $operations = null;
+            }
+
+            // filter names
+            if (!isset($filterNames[$key])) {
+                $fields = explode('__', $key);
+                if (count($fields) === 1) { // e.g. 'first_name'
+                    $value = $key; // 'first_name'
+                    $key = "{$tableName}__$value"; // 'Users__first_name'
+                } else {  // e.g. turn 'Users__first_name' to 'User First Name'
+                    $field = array_pop($fields);
+                    $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
+                    $fields = array_merge($associations, [$field]);
+                    $value = implode(' ', $fields);
+                }
+
+                $value = humanize($value);
+                $filterNames[$key] = $value;
+            }
+
+            // filter operations
+            $filterOperations[$key] = $operations;
+        }
+        $selectedFilters = $this->_request->getQueryParams();
+        $selectedFilters = empty($selectedFilters) ? [array_keys($filterOperations)[0] => null] : $selectedFilters;
+
+        return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
 }
