@@ -42,7 +42,6 @@ class TableFilter implements EventListenerInterface
     public function beforeFind(Event $event, Query $query, \ArrayObject $options, $primary)
     {
         $queryParams = $this->_controller->getRequest()->getQueryParams();
-        $controllerName = $this->_controller->getName();
         $table = $event->getSubject();
         $tableName = $table->getAlias();
         $entityClass = $table->getEntityClass();
@@ -73,8 +72,10 @@ class TableFilter implements EventListenerInterface
 
         // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
         // Permitted operations are set in `$filterable` in the model's entity class.
-        $filterable = $filterFields[$action] ?? [];
-        foreach ($entityClass::$filterable as $key => $value) {
+        $filterable = $filterFields[$action] ?? $entityClass::$filterable ?? [];
+        foreach ($filterable as $key => $value) {
+            unset($filterable[$key]);
+
             if (is_numeric($key)) {
                 $key = $value;
                 $value = [$this->_defaultOperation];
