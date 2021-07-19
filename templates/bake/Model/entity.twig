@@ -65,11 +65,4 @@ class {{ name }} extends {{ override ? "\\#{theme}\\Model\\Entity\\#{name}" : 'E
 {%- if not accessible and not hidden %}
 
 {% endif %}
-
-    /**
-     * Fields that can be filtered.
-     *
-     * @var array
-     */
-    //public static $filterable = [];
 }

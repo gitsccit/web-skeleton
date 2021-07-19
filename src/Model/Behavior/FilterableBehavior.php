@@ -146,7 +146,7 @@ class FilterableBehavior extends Behavior
     }
 
     /**
-     * Sets `$filterNames`, `$filterOperations`, `$selectedFilters` as view variables
+     * Returns view variables `$filterNames`, `$filterOperations`, `$selectedFilters`.
      *
      * @param Table|string|null $tableClass The class of the table that you want to filter
      */
@@ -160,7 +160,7 @@ class FilterableBehavior extends Behavior
         foreach ($filterFields as $key => $operations) {
             if (is_numeric($key)) { // e.g. 0 => 'title'
                 $key = $operations;
-                $operations = null;
+                $operations = [$this->_defaultOperation];
             }
 
             // filter names

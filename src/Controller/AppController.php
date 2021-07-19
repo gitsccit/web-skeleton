@@ -9,7 +9,6 @@ use Cake\Core\Configure;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\Routing\Router;
-use Skeleton\Listener\TableFilter;
 
 /**
  * Class AppController
