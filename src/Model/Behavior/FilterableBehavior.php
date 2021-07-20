@@ -21,7 +21,7 @@ class FilterableBehavior extends Behavior
      * @var array
      */
     protected $_defaultConfig = [
-        'restricted' => true,
+        'enabled' => false,
     ];
 
     protected $_request;
@@ -50,11 +50,15 @@ class FilterableBehavior extends Behavior
         $filterFields = $this->getConfigOrFail('fields');
         $queryParams = $this->_request->getQueryParams();
         $table = $event->getSubject();
+        $controllerName = $this->_request->getParam('controller');
         $tableName = $table->getAlias();
-        $action = $this->_request->getParam('action');
 
-        // skip if filtering for this controller action is not enabled.
-        if ($action !== 'index' && $this->getConfig('restricted')) {
+        if ($controllerName === $tableName) {
+            $this->setConfig('enabled', true);
+        }
+
+        // skip if filtering for this table is not enabled.
+        if (!$this->getConfig('enabled')) {
             return $event;
         }
 
@@ -192,15 +196,15 @@ class FilterableBehavior extends Behavior
     /**
      * Allows filtering on actions other than `index`.
      */
-    public function allowFiltering() {
-        $this->setConfig('restricted', false);
+    public function enableFiltering() {
+        $this->setConfig('enabled', true);
     }
 
     /**
      * Allows filtering only on `index` action.
      */
-    public function restrictFiltering() {
-        $this->setConfig('restricted', true);
+    public function disableFiltering() {
+        $this->setConfig('enabled', false);
     }
 
     public function setFilterFields($fields = [], $merge = false) {
