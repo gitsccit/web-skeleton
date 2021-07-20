@@ -196,6 +196,13 @@ class FilterableBehavior extends Behavior
         $this->setConfig('restricted', false);
     }
 
+    /**
+     * Allows filtering only on `index` action.
+     */
+    public function restrict() {
+        $this->setConfig('restricted', true);
+    }
+
     public function setFilterableFields($fields = [], $merge = false) {
         $this->setConfig('fields', $fields, $merge);
     }
