@@ -192,14 +192,14 @@ class FilterableBehavior extends Behavior
     /**
      * Allows filtering on actions other than `index`.
      */
-    public function unrestrict() {
+    public function allowFiltering() {
         $this->setConfig('restricted', false);
     }
 
     /**
      * Allows filtering only on `index` action.
      */
-    public function restrict() {
+    public function restrictFiltering() {
         $this->setConfig('restricted', true);
     }
 
