@@ -195,4 +195,8 @@ class FilterableBehavior extends Behavior
     public function unrestrict() {
         $this->setConfig('restricted', false);
     }
+
+    public function setFilterableFields($fields = [], $merge = false) {
+        $this->setConfig('fields', $fields, $merge);
+    }
 }
