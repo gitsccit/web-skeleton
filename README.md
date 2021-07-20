@@ -48,6 +48,33 @@ Use option `-t Skeleton` when baking. E.g.
 ##### CurrentUser
 For all incoming save request, this behavior sets `user_id` in request data to `Session::read('Auth.User.id')`.
 
+##### Filterable
+Allows the tables to be filtered by passing query parameters in the url.
+
+* Add Filterable behavior to the tables you want to filter on.
+  ```
+  $this->addBehavior('Skeleton.Filterable', [
+      'fields' => [
+          'title', // value defaults to ['contain']
+          'tag_count' => ['lte'],
+          'Tags__name' => ['contains', 'exact'],
+      ],
+      'names' => [
+          'Tags__name' => 'Tag',
+      ],
+  ]);
+  ```
+  `fields` is required, you can define custom names for the fields by defining `names`.
+
+* Set query params in request url. E.g.
+  * `/pages?title=skeleton` will return page entries where the title contains 'skeleton'.
+  * `/pages?title__exact=skeleton` will return page entries where the title is exactly 'skeleton'.
+  * `/pages?tag_count__lte=5` will return page entries where the tag count is less than or equal to 5.
+  * `/pages?Tags__name=plugins` will return page entries where the tag name contains 'plugins'.
+
+Available operations are `contains`, `exact`, `gt`, `gte`, `lt`, `lte`, `ne`.
+Default is `contains`, if no operation is specified in the query parameter.
+
 ### Crud
 * Make `AppController` extend `\Skeleton\Controller\AppController`.
 
@@ -101,34 +128,6 @@ You can define a list of valid credit card fields in the middleware.
       'dependent' => true
   ]);
   ```
-
-### Table Filter
-
-Allows all tables to be filtered dynamically by passing query parameters in the url.
-
-* Add `TableFilter` Event listener in `AppController.initialize()`:
-   ```
-  EventManager::instance()->on(new TableFilter($this));
-  ```
-
-* Set `$filterable` on the entity class that you want to filter. E.g.
-  ```
-  // src/Model/Entity/Article.php
-  
-  $filterable = [
-    'title', // value defaults to ['contain']
-    'tag_count' => ['lte'],
-    'Tags__name' => ['contains', 'exact'],
-  ];
-  ```
-* Set query params in request url. E.g. 
-  * `/pages?title=skeleton` will return page entries where the title contains 'skeleton'. 
-  * `/pages?title__exact=skeleton` will return page entries where the title is exactly 'skeleton'. 
-  * `/pages?tag_count__lte=5` will return page entries where the tag count is less than or equal to 5. 
-  * `/pages?Tags__name=plugins` will return page entries where the tag name contains 'plugins'. 
-
-Available operations are `contains`, `exact`, `gt`, `gte`, `lt`, `lte`, `ne`. 
-Default is `contains`, if no operation is specified in the query parameter.
 
 ### Templates
 When using one of the Crud component methods in your controller to load the response,
