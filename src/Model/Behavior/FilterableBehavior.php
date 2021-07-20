@@ -188,4 +188,11 @@ class FilterableBehavior extends Behavior
 
         return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
+
+    /**
+     * Allows filtering on actions other than `index`.
+     */
+    public function unrestrict() {
+        $this->setConfig('restricted', false);
+    }
 }
