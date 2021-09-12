@@ -28,6 +28,16 @@ function timestamp()
 }
 
 /**
+ * Return current Unix timestamp with milliseconds.
+ *
+ * @return float
+ */
+function millitime()
+{
+    return round(microtime(true) * 1000);
+}
+
+/**
  * Checks if an object is an associative array.
  * @param mixed $arr
  * @return bool
