@@ -5,26 +5,20 @@ namespace Skeleton\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * RequestSanitation middleware
  */
-class RequestSanitationMiddleware
+class RequestSanitationMiddleware implements MiddlewareInterface
 {
     /**
      * @var array A list of valid credit card fields.
      */
     protected $creditCardFields = ['credit_card'];
 
-    /**
-     * Invoke method.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request The request.
-     * @param \Psr\Http\Message\ResponseInterface $response The response.
-     * @param callable $next Callback to invoke the next middleware.
-     * @return \Psr\Http\Message\ResponseInterface A response
-     */
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $next)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $body = $request->getParsedBody();
         foreach ($body as $key => $value) {
@@ -35,7 +29,7 @@ class RequestSanitationMiddleware
         }
         $request = $request->withParsedBody($body);
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 
     /**
