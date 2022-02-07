@@ -11,6 +11,7 @@ use Cake\Utility\Inflector;
  * Add custom global functions.
  */
 require 'functions.php';
+require 'ApiHandler.php';
 require 'AppsApiHandler.php';
 require 'FilesApiHandler.php';
 
