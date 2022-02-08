@@ -35,22 +35,6 @@ class Plugin extends BasePlugin
     }
 
     /**
-     * Add routes for the plugin.
-     *
-     * If your plugin has many routes and you would like to isolate them into a separate file,
-     * you can create `$plugin/config/routes.php` and delete this method.
-     *
-     * @param \Cake\Routing\RouteBuilder $routes The route builder to update.
-     * @return void
-     */
-    public function routes(RouteBuilder $routes): void
-    {
-        $routes->plugin('Skeleton', ['path' => '/'], function (RouteBuilder $builder) {
-            $builder->fallbacks();
-        });
-    }
-
-    /**
      * Add middleware for the plugin.
      *
      * @param \Cake\Http\MiddlewareQueue $middlewareQueue The middleware queue to update.
