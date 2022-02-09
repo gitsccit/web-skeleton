@@ -1,6 +1,7 @@
 <?php
 
 use Cake\Core\Configure;
+use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Session;
 use Cake\Routing\Router;
 
@@ -96,12 +97,20 @@ class FilesApiHandler extends ApiHandler
         return $fileName . $extension;
     }
 
-    public function getFileUrl($id, $width = null, $height = null, $full = false): string
+    public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $full = false): string
     {
+        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
         if (empty($id)) {
-            return 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+            return $defaultImage;
         }
 
-        return Router::url('/files/' . $this->getFileName($id, $width, $height), $full);
+        try {
+            $fileName = $this->getFileName($id, $width, $height);
+        } catch (NotFoundException $exception) {
+            return $defaultImage;
+        }
+
+        return Router::url("/files/$fileName", $full);
     }
 }
