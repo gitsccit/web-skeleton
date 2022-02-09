@@ -1,7 +1,7 @@
 <?php
 
 use Cake\Core\Configure;
-use Cake\Http\Exception\NotFoundException;
+use Cake\Http\Exception\HttpException;
 use Cake\Http\Session;
 use Cake\Routing\Router;
 
@@ -107,7 +107,7 @@ class FilesApiHandler extends ApiHandler
 
         try {
             $fileName = $this->getFileName($id, $width, $height);
-        } catch (NotFoundException $exception) {
+        } catch (HttpException $exception) {
             return $defaultImage;
         }
 

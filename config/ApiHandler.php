@@ -4,6 +4,7 @@ use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Http\Client;
 use Cake\Routing\Router;
+use Cake\Http\Exception\HttpException;
 
 abstract class ApiHandler
 {
@@ -39,7 +40,7 @@ abstract class ApiHandler
         $code = $data['code'] ?? $response->getStatusCode();
 
         if ($code < 200 || $code >= 400) {
-            throw new Exception($data['message'], $code);
+            throw new HttpException($data['message'], $code);
         }
 
         return $response;
