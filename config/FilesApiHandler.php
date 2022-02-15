@@ -55,17 +55,22 @@ class FilesApiHandler extends ApiHandler
         }
 
         $fileName = "$id/" . preg_replace('/[^a-zA-Z0-9.]/', '-', $file['name']);
+
         if ($width) {
+            $parts = explode('.', $fileName);
+            $extension = array_pop($parts);
+            $fileName = implode('.', $parts);
+
             $fileName = "{$fileName}_$width";
 
             if ($height) {
                 $fileName = "{$fileName}x$height";
             }
+
+            $fileName .= $extension;
         }
 
-        $extension = get_file_extension_from_mime_type($file['mime_type']['name']);
-
-        return $fileName . $extension;
+        return $fileName;
     }
 
     public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $full = true): string
