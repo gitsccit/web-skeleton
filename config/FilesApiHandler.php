@@ -73,7 +73,7 @@ class FilesApiHandler extends ApiHandler
         return $fileName;
     }
 
-    public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $full = true): string
+    public function getFileUrl($id, ?int $width = null, ?int $height = null): string
     {
         $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
