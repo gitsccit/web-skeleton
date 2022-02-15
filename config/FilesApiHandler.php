@@ -87,6 +87,6 @@ class FilesApiHandler extends ApiHandler
             return $defaultImage;
         }
 
-        return $this->_baseUrl/$fileName;
+        return "$this->_baseUrl/$fileName";
     }
 }
