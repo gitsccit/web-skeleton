@@ -67,7 +67,7 @@ class FilesApiHandler extends ApiHandler
                 $fileName = "{$fileName}x$height";
             }
 
-            $fileName .= $extension;
+            $fileName = "$fileName.$extension";
         }
 
         return $fileName;
