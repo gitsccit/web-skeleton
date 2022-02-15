@@ -13,6 +13,7 @@ use Cake\Utility\Inflector;
 require 'functions.php';
 require 'ApiHandler.php';
 require 'AppsApiHandler.php';
+require 'FilesApiHandler.php';
 
 /*
  * Read configuration file and inject configuration into various
