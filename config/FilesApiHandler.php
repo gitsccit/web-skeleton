@@ -54,7 +54,7 @@ class FilesApiHandler extends ApiHandler
             }
         }
 
-        $fileName = $id;
+        $fileName = "$id/" . preg_replace('/[^a-zA-Z0-9.]/', '-', $file['name']);
         if ($width) {
             $fileName = "{$fileName}_$width";
 
