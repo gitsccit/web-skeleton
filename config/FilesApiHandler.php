@@ -87,7 +87,7 @@ class FilesApiHandler extends ApiHandler
             return $defaultImage;
         }
 
-        $baseUrl = str_replace('/api', '', $this->_baseUrl);
+        $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
 
         return "$baseUrl/$fileName";
     }
