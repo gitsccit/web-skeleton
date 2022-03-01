@@ -174,7 +174,7 @@ class AppsApiHandler extends ApiHandler
                     $replacement = $content;
                     break;
                 case 'file':
-                    $replacement = Router::url("/files/download/$id");
+                    $replacement = $fileApiClient->getFileUrl($id, null, null, true);
                     break;
                 case 'image':
                     $replacement = $fileApiClient->getFileUrl($id);

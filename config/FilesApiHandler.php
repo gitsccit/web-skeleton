@@ -73,7 +73,7 @@ class FilesApiHandler extends ApiHandler
         return $fileName;
     }
 
-    public function getFileUrl($id, ?int $width = null, ?int $height = null): string
+    public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $download = false): string
     {
         $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
@@ -89,6 +89,6 @@ class FilesApiHandler extends ApiHandler
 
         $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
 
-        return "$baseUrl/$fileName";
+        return $download ? "$baseUrl/download/$fileName" : "$baseUrl/$fileName";
     }
 }
