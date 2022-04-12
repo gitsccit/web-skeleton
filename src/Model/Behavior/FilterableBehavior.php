@@ -187,8 +187,8 @@ class FilterableBehavior extends Behavior
             // filter operations
             $filterOperations[$key] = $operations;
         }
-        $selectedFilters = $this->_request->getQueryParams();
-        $selectedFilters = empty($selectedFilters) ? [array_keys($filterOperations)[0] => null] : $selectedFilters;
+        $selectedFilters = array_combine(array_keys($filterNames), array_fill(0, count(array_keys($filterNames)), null));
+        $selectedFilters = array_merge($selectedFilters, $this->_request->getQueryParams());
 
         return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
@@ -196,22 +196,26 @@ class FilterableBehavior extends Behavior
     /**
      * Allows filtering on actions other than `index`.
      */
-    public function enableFiltering() {
+    public function enableFiltering()
+    {
         $this->setConfig('enabled', true);
     }
 
     /**
      * Allows filtering only on `index` action.
      */
-    public function disableFiltering() {
+    public function disableFiltering()
+    {
         $this->setConfig('enabled', false);
     }
 
-    public function setFilterFields($fields = [], $merge = false) {
+    public function setFilterFields($fields = [], $merge = false)
+    {
         $this->setConfig('fields', $fields, $merge);
     }
 
-    public function setFilterNames($names = [], $merge = false) {
+    public function setFilterNames($names = [], $merge = false)
+    {
         $this->setConfig('names', $names, $merge);
     }
 }
