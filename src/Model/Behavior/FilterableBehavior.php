@@ -84,7 +84,14 @@ class FilterableBehavior extends Behavior
             $filterFields[$key] = $value;
         }
 
+        if ($searchString = $queryParams['q'] ?? null) {
+            foreach ($filterFields as $filterField => $filterOptions) {
+                $queryParams[$filterField] = $searchString;
+            }
+        }
+
         // add the `and` conditions. e.g. WHERE ... AND `name` LIKE "%James%" AND `age` <= 23.
+        $conditions = [];
         foreach ($queryParams as $param => $value) {
             // get the fields in the query param, i.e. ['Users', 'age', 'lt'] for 'Users__age__lt'.
             $fields = explode('__', $param);
@@ -140,11 +147,13 @@ class FilterableBehavior extends Behavior
 
             // construct query
             if ($table->hasAssociation($association)) {
-                $query->innerJoinWith($association);
+                $query->leftJoinWith($association);
             }
 
-            $query->where(["$sqlField $sqlOperation" => $value]);
+            $conditions["$sqlField $sqlOperation"] = $value;
         }
+
+        $query->where(isset($queryParams['q']) ? ['OR' => $conditions] : $conditions);
 
         return $event;
     }
