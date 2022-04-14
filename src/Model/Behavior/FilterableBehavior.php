@@ -200,8 +200,7 @@ class FilterableBehavior extends Behavior
         $selectedFilters = array_combine(array_keys($filterNames), array_fill(0, count(array_keys($filterNames)), null));
         foreach ($this->_request->getQueryParams() as $key => $value) {
             $filterField = implode('__', explode('__', $key, -1));
-            if (array_key_exists($filterField, $selectedFilters)) {
-                unset($selectedFilters[$filterField]);
+            if (array_key_exists($filterField, $filterNames)) {
                 $selectedFilters[$key] = $value;
             }
         }
