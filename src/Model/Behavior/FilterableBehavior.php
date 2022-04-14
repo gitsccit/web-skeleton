@@ -196,8 +196,15 @@ class FilterableBehavior extends Behavior
             // filter operations
             $filterOperations[$key] = $operations;
         }
+
         $selectedFilters = array_combine(array_keys($filterNames), array_fill(0, count(array_keys($filterNames)), null));
-        $selectedFilters = array_merge($selectedFilters, array_intersect_key($selectedFilters, $this->_request->getQueryParams()));
+        foreach ($this->_request->getQueryParams() as $key => $value) {
+            $filterField = implode('__', explode('__', $key, -1));
+            if (array_key_exists($filterField, $selectedFilters)) {
+                unset($selectedFilters[$filterField]);
+                $selectedFilters[$key] = $value;
+            }
+        }
 
         return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
