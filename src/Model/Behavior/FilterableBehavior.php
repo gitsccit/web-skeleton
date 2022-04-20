@@ -199,7 +199,14 @@ class FilterableBehavior extends Behavior
 
         $selectedFilters = array_combine(array_keys($filterNames), array_fill(0, count(array_keys($filterNames)), null));
         foreach ($this->_request->getQueryParams() as $key => $value) {
-            $filterField = implode('__', explode('__', $key, -1));
+            $parts = explode('__', $key);
+            $last = array_pop($parts);
+
+            if (!array_key_exists($last, $this->_operationLookup)) {
+                $parts[] = $last;
+            }
+            $filterField = implode('__', $parts);
+
             if (array_key_exists($filterField, $filterNames)) {
                 $selectedFilters[$key] = $value;
             }
