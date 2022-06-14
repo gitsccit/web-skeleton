@@ -70,7 +70,7 @@ class CrudComponent extends Component
 
         $request = $this->_controller->getRequest();
         $this->_action = $request->getParam('action');
-        $this->_serialized = $request->is(['json', 'xml']);
+        $this->_serialized = $request->is(['json']);
 
         $plugin = $this->_controller->getPlugin();
         $modelClass = ($plugin ? "$plugin." : '') . $this->_controller->getName();
