@@ -15,8 +15,7 @@ class AppsApiHandler extends ApiHandler
         parent::__construct($config);
 
         $this->_baseUrl = Configure::read('Urls.apps');
-        $store = $this->getStore();
-        $this->_storeId = $store['id'];
+        $this->_storeId = Configure::read('store');
     }
 
     /**
