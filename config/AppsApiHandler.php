@@ -10,68 +10,52 @@ class AppsApiHandler extends ApiHandler
 
     protected $_storeId;
 
-    protected $_environmentId;
-
     public function __construct(array $config = [])
     {
         parent::__construct($config);
 
         $this->_baseUrl = Configure::read('Urls.apps');
-        $environment = $this->getEnvironment();
         $store = $this->getStore();
         $this->_storeId = $store['id'];
-        $this->_environmentId = $environment['id'];
     }
 
     /**
-     * Gets the CSS for the current store and environment.
+     * Gets the CSS for the current store.
      *
      * @return string|null
      */
     public function getCss(): ?string
     {
         $cacheKey = 'css';
-        $url = "/admin/environments/$this->_environmentId/stores/$this->_storeId/css";
+        $url = "/admin/stores/$this->_storeId/css";
         $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/css"];
 
         return $this->cacheOrGet($cacheKey, $url, $queryParams)['css'] ?? null;
     }
 
     /**
-     * Returns the current environment.
-     *
-     * @return array|null
-     */
-    public function getEnvironment(): ?array
-    {
-        $storeIpMap = $this->getStoreIpMap();
-
-        return $storeIpMap['environment'] ?? null;
-    }
-
-    /**
-     * Gets the JavaScript for the current store and environment.
+     * Gets the JavaScript for the current store.
      *
      * @return string|null
      */
     public function getJavascript(): ?string
     {
         $cacheKey = 'js';
-        $url = "/admin/environments/$this->_environmentId/stores/$this->_storeId/javascript";
+        $url = "/admin/stores/$this->_storeId/javascript";
         $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/javascript"];
 
         return $this->cacheOrGet($cacheKey, $url, $queryParams)['javascript'] ?? null;
     }
 
     /**
-     * Gets the navigation menus for the current store and environment.
+     * Gets the navigation menus for the current store.
      *
      * @return array
      */
     public function getNavMenus(): array
     {
         $cacheKey = 'nav_menus';
-        $url = "/admin/environments/$this->_environmentId/stores/$this->_storeId/menus";
+        $url = "/admin/stores/$this->_storeId/menus";
         $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/menus"];
         $menus = $this->cacheOrGet($cacheKey, $url, $queryParams)['menus'] ?? [];
 
@@ -79,14 +63,14 @@ class AppsApiHandler extends ApiHandler
     }
 
     /**
-     * Gets the options for the current store and environment.
+     * Gets the options for the current store.
      *
      * @return array
      */
     public function getOptions(): array
     {
         $cacheKey = 'options';
-        $url = "/admin/environments/$this->_environmentId/stores/$this->_storeId/options";
+        $url = "/admin/stores/$this->_storeId/options";
         $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/options"];
         $options = $this->cacheOrGet($cacheKey, $url, $queryParams)['options'] ?? [];
         $options = Hash::combine($options, '{n}.name', '{n}.value');
@@ -95,7 +79,7 @@ class AppsApiHandler extends ApiHandler
     }
 
     /**
-     * Gets the page info for the current store, environment and the given url.
+     * Gets the page info for the current store and the given url.
      *
      * @param string $url
      * @return mixed|null
@@ -104,7 +88,6 @@ class AppsApiHandler extends ApiHandler
     {
         $response = $this->get('/cms/pages', [
             'store_id' => $this->_storeId,
-            'environment_id' => $this->_environmentId,
             'url' => ltrim($url, '/'),
         ]);
 
@@ -112,14 +95,14 @@ class AppsApiHandler extends ApiHandler
     }
 
     /**
-     * Gets the sitemap for the current store and environment.
+     * Gets the sitemap for the current store.
      *
      * @return array|null
      */
     public function getSiteMap(): ?array
     {
         $cacheKey = 'sitemap';
-        $url = "/admin/environments/$this->_environmentId/stores/$this->_storeId/sitemap";
+        $url = "/admin/stores/$this->_storeId/sitemap";
         $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/sitemap"];
 
         return $this->cacheOrGet($cacheKey, $url, $queryParams)['sitemap'] ?? null;
@@ -132,25 +115,12 @@ class AppsApiHandler extends ApiHandler
      */
     public function getStore(): ?array
     {
-        $storeIpMap = $this->getStoreIpMap();
+        $cacheKey = 'store';
+        $url = "/admin/stores/$this->_storeId";
+        $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/store"];
 
-        return $storeIpMap['store'] ?? null;
+        return $this->cacheOrGet($cacheKey, $url, $queryParams)['store'] ?? null;
     }
-
-    /**
-     * Returns the current store IP map based on current IP.
-     *
-     * @return array|null
-     */
-    public function getStoreIpMap(): ?array
-    {
-        $cacheKey = 'store_ip_map';
-        $url = '/admin/store-ip-maps/current-ip';
-        $queryParams = ['refresh_callback_url' => "$this->_refresh_callback_url/store-ip-map"];
-
-        return $this->cacheOrGet($cacheKey, $url, $queryParams)['storeIpMap'] ?? null;
-    }
-
 
     /**
      * Replaces the {{xxx}} placeholders in the html with the content.
