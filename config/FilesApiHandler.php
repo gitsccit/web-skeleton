@@ -33,14 +33,12 @@ class FilesApiHandler extends ApiHandler
 
     protected function getFileName($id, $width = null, $height = null): string
     {
-        $session = new Session();
         $file = $this->getFile($id);
-        $allowedSizes = $session->read('options.files.resize');
-        $allowedSizes = explode(',', $allowedSizes);
+        $allowedSizes = [50, 100, 200, 300, 400, 800, 1200, 1600, 2400];
         if ($width) {
             foreach ($allowedSizes as $size) {
                 if ($width <= $size) {
-                    $width = (int)$size;
+                    $width = $size;
                     break;
                 }
             }
@@ -48,7 +46,7 @@ class FilesApiHandler extends ApiHandler
         if ($height) {
             foreach ($allowedSizes as $size) {
                 if ($height <= $size) {
-                    $height = (int)$size;
+                    $height = $size;
                     break;
                 }
             }
