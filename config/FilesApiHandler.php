@@ -1,9 +1,8 @@
 <?php
 
+use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Http\Exception\HttpException;
-use Cake\Http\Session;
-use Cake\Routing\Router;
 
 class FilesApiHandler extends ApiHandler
 {
@@ -31,9 +30,41 @@ class FilesApiHandler extends ApiHandler
         return $this->cacheOrGet($cacheKey, $url, $queryParams)['file'] ?? null;
     }
 
-    protected function getFileName($id, $width = null, $height = null): string
+    public function getFiles(array $ids): ?array
     {
-        $file = $this->getFile($id);
+        $result = [];
+        $fetch = [];
+
+        foreach ($ids as $id) {
+            $cacheKey = "file_$id";
+            $file = Cache::read($cacheKey, $this->_cacheConfig);
+
+            if (empty($result)) {
+                $fetch[] = $id;
+            }
+
+            $result[$id] = $file;
+        }
+
+        $idsString = implode('/', $fetch);
+        $url = "/files/$idsString";
+        $queryParams = ['refresh_callback_url' => "/pages/clear-cache/files/$idsString"];
+        $response = $this->get($url, $queryParams);
+
+        if ($files = $response->getJson()['data']['files'] ?? null) {
+            foreach ($files as $file) {
+                $cacheKey = "file_$file[id]";
+                Cache::write($cacheKey, $file, $this->_cacheConfig);
+                $result[$file['id']] = $file;
+            }
+        }
+
+        return $result;
+    }
+
+    protected function getFileNames($ids, $width = null, $height = null): array
+    {
+        $files = $this->getFiles($ids);
         $allowedSizes = [50, 100, 200, 300, 400, 800, 1200, 1600, 2400];
         if ($width) {
             foreach ($allowedSizes as $size) {
@@ -52,23 +83,33 @@ class FilesApiHandler extends ApiHandler
             }
         }
 
-        $fileName = "$id/" . preg_replace('/[^a-zA-Z0-9.]/', '-', $file['name']);
-
-        if ($width) {
-            $parts = explode('.', $fileName);
-            $extension = array_pop($parts);
-            $fileName = implode('.', $parts);
-
-            $fileName = "{$fileName}_$width";
-
-            if ($height) {
-                $fileName = "{$fileName}x$height";
+        $fileNames = [];
+        foreach ($files as $id => $file) {
+            if (empty($file)) {
+                $fileNames[$id] = null;
+                continue;
             }
 
-            $fileName = "$fileName.$extension";
+            $fileName = "$id/" . preg_replace('/[^a-zA-Z0-9.]/', '-', $file['name']);
+
+            if ($width) {
+                $parts = explode('.', $fileName);
+                $extension = array_pop($parts);
+                $fileName = implode('.', $parts);
+
+                $fileName = "{$fileName}_$width";
+
+                if ($height) {
+                    $fileName = "{$fileName}x$height";
+                }
+
+                $fileName = "$fileName.$extension";
+            }
+
+            $fileNames[$id] = $fileName;
         }
 
-        return $fileName;
+        return $fileNames;
     }
 
     public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $download = false): string
@@ -80,7 +121,7 @@ class FilesApiHandler extends ApiHandler
         }
 
         try {
-            $fileName = $this->getFileName($id, $width, $height);
+            $fileName = $this->getFileNames([$id], $width, $height)[$id] ?? $defaultImage;
         } catch (HttpException $exception) {
             return $defaultImage;
         }
@@ -88,5 +129,28 @@ class FilesApiHandler extends ApiHandler
         $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
 
         return $download ? "$baseUrl/download/$fileName" : "$baseUrl/$fileName";
+    }
+
+    public function getFileUrls(array $ids, ?int $width = null, ?int $height = null): array
+    {
+        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+        if (empty($ids)) {
+            return [];
+        }
+
+        try {
+            $fileNames = $this->getFileNames($ids, $width, $height);
+        } catch (HttpException $exception) {
+            return [];
+        }
+
+        $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
+
+        foreach ($fileNames as $id => $fileName) {
+            $fileNames[$id] = empty($fileName) ? $defaultImage : "$baseUrl/$fileName";
+        }
+
+        return $fileNames;
     }
 }
