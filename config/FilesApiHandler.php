@@ -39,19 +39,23 @@ class FilesApiHandler extends ApiHandler
             $cacheKey = "file_$id";
             $file = Cache::read($cacheKey, $this->_cacheConfig);
 
-            if (empty($result)) {
+            if (empty($file)) {
                 $fetch[] = $id;
             }
 
             $result[$id] = $file;
         }
 
+        if (empty($fetch)) {
+            return $result;
+        }
+
         $idsString = implode('/', $fetch);
         $url = "/files/$idsString";
         $queryParams = ['refresh_callback_url' => "/pages/clear-cache/files/$idsString"];
-        $response = $this->get($url, $queryParams);
+        $data = $this->get($url, $queryParams)->getJson()['data'];
 
-        if ($files = $response->getJson()['data']['files'] ?? null) {
+        if ($files = $data['files'] ?? [$data['file']] ?? null) {
             foreach ($files as $file) {
                 $cacheKey = "file_$file[id]";
                 Cache::write($cacheKey, $file, $this->_cacheConfig);
