@@ -116,9 +116,10 @@ class FilesApiHandler extends ApiHandler
         return $fileNames;
     }
 
-    public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $download = false): string
+    public function getFileUrl($id, ?int $width = null, ?int $height = null, bool $download = false): ?string
     {
-        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+//        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        $defaultImage = null;
 
         if (empty($id)) {
             return $defaultImage;
@@ -137,7 +138,8 @@ class FilesApiHandler extends ApiHandler
 
     public function getFileUrls(array $ids, ?int $width = null, ?int $height = null): array
     {
-        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+//        $defaultImage = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        $defaultImage = null;
 
         if (empty($ids)) {
             return [];
