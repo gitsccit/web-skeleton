@@ -25,7 +25,7 @@ class DataSource implements EventListenerInterface
         $table = $event->getSubject();
         $configName = $table->getConnection()->configName();
 
-        if (!endsWith($configName, 'replica') && !$table->getConnection()->inTransaction()) {
+        if (!str_ends_with($configName, 'replica') && !$table->getConnection()->inTransaction()) {
             $config = $configName === 'default' ? 'replica' : "${configName}_replica";
             $table->setConnection(ConnectionManager::get($config));
         }
@@ -46,7 +46,7 @@ class DataSource implements EventListenerInterface
         $table = $event->getSubject();
         $configName = $table->getConnection()->configName();
 
-        if (endsWith($configName, 'replica')) {
+        if (str_ends_with($configName, 'replica')) {
             $event->stopPropagation();
             $table->getConnection()->rollback();
             $config = $configName === 'replica' ? 'default' : str_replace('_replica', '', $configName);

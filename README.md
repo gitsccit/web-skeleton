@@ -99,8 +99,6 @@ from that table.
 
 ### Global Helper Functions
 `config/functions.php` contains globally available helper functions. E.g.,
-* startsWith(‘disease’, ‘dis’) => true
-* endsWith(‘disease’, ‘ease’) => true
 * timestamp() => ‘2019-10-03 16:00:00’
 * is_assoc(\[‘key’ => ‘value’]) => true | is_assoc(\[‘JustValue’]) => false
 
