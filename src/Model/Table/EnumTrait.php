@@ -25,7 +25,7 @@ trait EnumTrait
             $stmt = $db->query($sql)->fetch('assoc');
             $enumData = $stmt['Type'];
 
-            $options = false;
+            $options = [];
             if (!empty($enumData)) {
                 $patterns = ['enum(', ')', '\''];
                 $enumData = str_replace($patterns, '', $enumData);
