@@ -25,7 +25,7 @@ class DataSource implements EventListenerInterface
         $table = $event->getSubject();
         $configName = $table->getConnection()->configName();
 
-        if (!str_ends_with($configName, 'replica') && !$table->getConnection()->inTransaction()) {
+        if (!str_ends_with($configName, 'replica') && !$table->getConnection()->inTransaction() && $primary) {
             $config = $configName === 'default' ? 'replica' : "${configName}_replica";
             $table->setConnection(ConnectionManager::get($config));
         }
