@@ -36,6 +36,10 @@ class FilesApiHandler extends ApiHandler
         $fetch = [];
 
         foreach ($ids as $id) {
+            if (empty($id)) {
+                continue;
+            }
+
             $cacheKey = "file_$id";
             $file = Cache::read($cacheKey, $this->_cacheConfig);
 
