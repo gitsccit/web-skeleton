@@ -61,9 +61,11 @@ class FilesApiHandler extends ApiHandler
 
         if ($files = $data['files'] ?? [$data['file']] ?? null) {
             foreach ($files as $file) {
-                $cacheKey = "file_$file[id]";
-                Cache::write($cacheKey, $file, $this->_cacheConfig);
-                $result[$file['id']] = $file;
+                if ($file) {
+                    $cacheKey = "file_$file[id]";
+                    Cache::write($cacheKey, $file, $this->_cacheConfig);
+                    $result[$file['id']] = $file;
+                }
             }
         }
 
