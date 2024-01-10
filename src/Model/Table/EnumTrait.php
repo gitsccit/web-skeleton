@@ -15,7 +15,7 @@ trait EnumTrait
     function getEnumOptions($field)
     {
         $table = $this->getTable();
-        $cacheKey = "${table}_${field}_enum_options";
+        $cacheKey = "{$table}_{$field}_enum_options";
         $options = Cache::read($cacheKey);
 
         // fetch enums from the table schema

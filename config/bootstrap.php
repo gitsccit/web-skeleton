@@ -36,7 +36,7 @@ foreach ($plugins as $plugin) {
     foreach (['default', 'replica'] as $dataSource) {
         $config = ConnectionManager::getConfig($dataSource);
         $config['database'] = $plugin;
-        $config['name'] = $dataSource === 'default' ? $plugin : "${plugin}_replica";
+        $config['name'] = $dataSource === 'default' ? $plugin : "{$plugin}_replica";
         if (is_null(ConnectionManager::getConfig($config['name']))) {
             ConnectionManager::setConfig($config['name'], $config);
         }

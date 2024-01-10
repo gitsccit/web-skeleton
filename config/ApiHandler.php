@@ -67,7 +67,7 @@ abstract class ApiHandler
         $etag = $response->getHeaderLine('Etag') ?: (string)crc32($response->getStringBody());
         $etag = trim($etag, '"');
 
-        Cache::write("${cacheKey}_etag", $etag, $this->_cacheConfig);
+        Cache::write("{$cacheKey}_etag", $etag, $this->_cacheConfig);
         Cache::write($cacheKey, $result, $this->_cacheConfig);
 
         return $result;
@@ -144,7 +144,7 @@ abstract class ApiHandler
 
     public function readCache(string $cacheKey)
     {
-        return Cache::read("${cacheKey}", $this->_cacheConfig);
+        return Cache::read("{$cacheKey}", $this->_cacheConfig);
     }
 
     /**
@@ -160,7 +160,7 @@ abstract class ApiHandler
             $success = Cache::delete($cacheKey, $this->_cacheConfig);
         }
 
-        $etagCacheKey = "${cacheKey}_etag";
+        $etagCacheKey = "{$cacheKey}_etag";
         if (Cache::read($etagCacheKey, $this->_cacheConfig)) {
             $success = $success && Cache::delete($etagCacheKey, $this->_cacheConfig);
         }

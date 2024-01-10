@@ -39,10 +39,10 @@ class UtilsHelper extends Helper
             [$plugin,] = pluginSplit($table->getRegistryAlias());
             $prefix = $this->_View->getRequest()->getParam('prefix');
             $controller = Inflector::camelize($table->getTable());
-            if (!class_exists("App\Controller\\$prefix\\${controller}Controller")) {
+            if (!class_exists("App\Controller\\$prefix\\{$controller}Controller")) {
                 $prefixes = get_subfolder_names(APP . 'Controller/*');
                 $prefix = array_filter($prefixes, function ($prefix) use ($controller) {
-                        return class_exists("App\Controller\\$prefix\\${controller}Controller");
+                        return class_exists("App\Controller\\$prefix\\{$controller}Controller");
                 })[0] ?? null;
             }
             $value = $this->Html->link(
