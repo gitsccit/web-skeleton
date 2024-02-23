@@ -139,7 +139,7 @@ class FilesApiHandler extends ApiHandler
 
         $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
 
-        return $download ? "$baseUrl/download/$fileName" : "$baseUrl/$fileName";
+        return $download ? "{$baseUrl}download/$fileName" : "{$baseUrl}$fileName";
     }
 
     public function getFileUrls(array $ids, ?int $width = null, ?int $height = null): array
