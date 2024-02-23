@@ -6,7 +6,7 @@ use Cake\Http\Exception\HttpException;
 
 class FilesApiHandler extends ApiHandler
 {
-    protected $_tokenName = 'fileServerApiToken';
+    protected $_tokenName = 'filesApiToken';
 
     public function __construct(array $config = [])
     {
