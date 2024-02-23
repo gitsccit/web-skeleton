@@ -55,7 +55,7 @@ class FilesApiHandler extends ApiHandler
         }
 
         $idsString = implode('/', $fetch);
-        $url = "/files/$idsString";
+        $url = "files/$idsString";
         $queryParams = ['refresh_callback_url' => "/pages/clear-cache/files/$idsString"];
         $data = $this->get($url, $queryParams)->getJson()['data'];
 
