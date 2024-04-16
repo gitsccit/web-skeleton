@@ -17,7 +17,7 @@ class CurrentUserBehavior extends Behavior
      *
      * @var array
      */
-    protected $_defaultConfig = [];
+    protected array $_defaultConfig = [];
 
     public function beforeMarshal(Event $event, \ArrayObject $data, \ArrayObject $options)
     {

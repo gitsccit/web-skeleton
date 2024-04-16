@@ -34,7 +34,7 @@ class PhoneHelper extends Helper
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'templates' => [
             'phone' => '<a href="{{url}}"{{attrs}}>{{content}}</a>',
         ],

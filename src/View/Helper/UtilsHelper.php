@@ -16,13 +16,13 @@ use Cake\View\Helper;
  */
 class UtilsHelper extends Helper
 {
-    public $helpers = ['Form', 'Html'];
+    public array $helpers = ['Form', 'Html'];
     /**
      * Default configuration.
      *
      * @var array
      */
-    protected $_defaultConfig = [];
+    protected array $_defaultConfig = [];
 
     /**
      * @param mixed $value

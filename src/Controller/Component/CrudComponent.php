@@ -52,7 +52,7 @@ class CrudComponent extends Component
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'fallbackTemplatePath' => 'Common',
     ];
 
