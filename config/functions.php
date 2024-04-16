@@ -182,7 +182,7 @@ function humanize($string)
  * @param int $number The phone number to be prettified
  * @return string The prettified phone number
  */
-function formatPhoneNumber($number)
+function formatPhoneNumber(string $number)
 {
     $number = preg_replace("/[^0-9]/", "", $number);
     if (strlen($number) == 7) {
