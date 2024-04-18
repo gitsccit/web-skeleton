@@ -197,8 +197,8 @@ class CrudComponent extends Component
 
     /**
      * Helper method to reproduce contain for associations. (For paginating associations)
-     * By default Cake converts find('all', ['contain' => ['Users' => ['limit' => 5]]]) to ['Users' => ['limit' => [5 => []]]],
-     * This method converts it back to ['Users' => ['limit' => 5]]].
+     * By default Cake converts find(contain: ['Users' => ['limit' => 5]]) to ['Users' => ['limit' => [5 => []]]],
+     * This method converts it back to ['Users' => ['limit' => 5]].
      *
      * @param array $contain
      * @return array|mixed
@@ -269,7 +269,7 @@ class CrudComponent extends Component
                 // if association is in original 'contain'
                 if (isset($contain[$association->getName()])) {
                     $nestedContain = $contain[$association->getName()] ?? [];
-                    $query = $associatedTable->find('all', $this->_formatContain($nestedContain));
+                    $query = $associatedTable->find($this->_formatContain($nestedContain));
 
                     if ($association instanceof Association\HasMany) {
                         $query->where(["{$associatedTable->getAlias()}.{$association->getForeignKey()}" => $entity->id]);
