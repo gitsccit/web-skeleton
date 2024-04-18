@@ -42,7 +42,7 @@ class UtilsHelper extends Helper
             if (!class_exists("App\Controller\\$prefix\\{$controller}Controller")) {
                 $prefixes = get_subfolder_names(APP . 'Controller/*');
                 $prefix = array_filter($prefixes, function ($prefix) use ($controller) {
-                        return class_exists("App\Controller\\$prefix\\{$controller}Controller");
+                    return class_exists("App\Controller\\$prefix\\{$controller}Controller");
                 })[0] ?? null;
             }
             $value = $this->Html->link(
@@ -51,7 +51,7 @@ class UtilsHelper extends Helper
             );
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.User.time_zone.name');
-            $value = $this->_View->Time->format($value, null, null, $timezone);
+            $value = $this->_View->Time->format($value, null, false, $timezone);
         } elseif (empty($value)) {
             $value = "—";
         } elseif (is_string($value)) {

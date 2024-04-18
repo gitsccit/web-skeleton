@@ -65,7 +65,7 @@ trait SoftDeleteTrait
             ['_primary' => false] + $options->getArrayCopy()
         );
 
-        $query = $this->query();
+        $query = $this->selectQuery();
         $conditions = (array)$entity->extract($primaryKey);
         $statement = $query->update()
             ->set([$this->getSoftDeleteField() => timestamp()])
@@ -87,7 +87,7 @@ trait SoftDeleteTrait
 
     public function deleteAll($conditions)
     {
-        $query = $this->query()
+        $query = $this->selectQuery()
             ->update()
             ->set([$this->getSoftDeleteField() => timestamp()])
             ->where($conditions);

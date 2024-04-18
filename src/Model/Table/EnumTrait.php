@@ -22,7 +22,7 @@ trait EnumTrait
         if (!$options) {
             $sql = "SHOW COLUMNS FROM `$table` LIKE '$field'";
             $db = ConnectionManager::get($this->defaultConnectionName());
-            $stmt = $db->query($sql)->fetch('assoc');
+            $stmt = $db->execute($sql)->fetchAssoc();
             $enumData = $stmt['Type'];
 
             $options = [];
