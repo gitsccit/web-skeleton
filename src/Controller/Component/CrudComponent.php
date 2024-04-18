@@ -269,7 +269,7 @@ class CrudComponent extends Component
                 // if association is in original 'contain'
                 if (isset($contain[$association->getName()])) {
                     $nestedContain = $contain[$association->getName()] ?? [];
-                    $query = $associatedTable->find($this->_formatContain($nestedContain));
+                    $query = $associatedTable->find(contain: $nestedContain);
 
                     if ($association instanceof Association\HasMany) {
                         $query->where(["{$associatedTable->getAlias()}.{$association->getForeignKey()}" => $entity->id]);
@@ -298,7 +298,6 @@ class CrudComponent extends Component
             $table = $this->_table;
         }
 
-        $this->_controller->loadComponent('Paginator');
         if (empty($table)) {
             throw new \RuntimeException('Unable to locate an object compatible with paginate.');
         }
@@ -312,7 +311,9 @@ class CrudComponent extends Component
             }, $tables);
         }
 
-        $settings += $this->_controller->paginate;
+        if (isset($this->_controller->paginate)) {
+            $settings += $this->_controller->paginate;
+        }
 
         $resultSets[lcfirst(Inflector::classify($table->getAlias()))] = $entity;
         $resultSets['associations'] = [];
@@ -320,7 +321,7 @@ class CrudComponent extends Component
             $table = $query->getRepository();
             $field = Inflector::variable($table->getAlias());
             $fieldSettings = array_merge($settings, ['scope' => Inflector::dasherize($field)]);
-            $result = $this->_controller->Paginator->paginate($query, $fieldSettings);
+            $result = $this->_controller->paginate($query, $fieldSettings);
             if ($result->count() === 0) {
                 $result = $table;
             }
