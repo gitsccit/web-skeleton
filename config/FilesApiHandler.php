@@ -160,7 +160,7 @@ class FilesApiHandler extends ApiHandler
         $baseUrl = str_replace('/api', '/files', $this->_baseUrl);
 
         foreach ($fileNames as $id => $fileName) {
-            $fileNames[$id] = empty($fileName) ? $defaultImage : "$baseUrl/$fileName";
+            $fileNames[$id] = empty($fileName) ? $defaultImage : "$baseUrl$fileName";
         }
 
         return $fileNames;
