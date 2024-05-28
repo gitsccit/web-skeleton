@@ -52,7 +52,6 @@ class Plugin extends BasePlugin
             ->noSniff();
 
         $middlewareQueue->prepend($securityHeaders);
-        $middlewareQueue->add(new BodyParserMiddleware(['xml' => true]));
         $middlewareQueue->add(new RequestSanitationMiddleware());
 
         return $middlewareQueue;
