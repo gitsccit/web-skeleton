@@ -9,6 +9,7 @@ use Cake\Core\App;
 use Cake\Datasource\EntityInterface;
 use Cake\Datasource\ResultSetInterface;
 use Cake\Event\Event;
+use Cake\Http\Exception\NotFoundException;
 use Cake\ORM\Association;
 use Cake\ORM\Query;
 use Cake\ORM\Table;
@@ -257,6 +258,11 @@ class CrudComponent extends Component
 
             // reset 'contain' of the query to only the BelongsTo associations, construct base query
             $entity = $object->contain(array_intersect(array_keys($contain), $belongsTo), true)->first();
+
+            if (!$entity) {
+                throw new NotFoundException();
+            }
+
             $queries = [];
 
             // get all associated tables of the types in $associationTypes
