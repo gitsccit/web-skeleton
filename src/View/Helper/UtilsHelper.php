@@ -13,10 +13,11 @@ use Cake\View\Helper;
  *
  * @property \Cake\View\Helper\FormHelper $Form
  * @property \Cake\View\Helper\HtmlHelper $Html
+ * @property \Cake\View\Helper\TextHelper $Text
  */
 class UtilsHelper extends Helper
 {
-    public array $helpers = ['Form', 'Html'];
+    public array $helpers = ['Form', 'Html', 'Text'];
     /**
      * Default configuration.
      *
@@ -28,7 +29,7 @@ class UtilsHelper extends Helper
      * @param mixed $value
      * @return string Parsed string.
      */
-    public function display($value)
+    public function display($value, $maxLength = 50)
     {
         if (is_numeric($value) && !is_string($value)) {
             $value = (string)$value;
@@ -60,6 +61,7 @@ class UtilsHelper extends Helper
                 $value = str_replace('@', '@<wbr>', $value);
             }
             $value = __($value);
+            $value = $this->Text->truncate($value, $maxLength);
         }
 
         return $value;
