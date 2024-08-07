@@ -71,10 +71,12 @@ class UtilsHelper extends Helper
                 <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
             </div>
             <div class='modal-body'>
-                <table class='table table-bordered'>
-                    {$this->Html->tableHeaders(array_keys($json[0]))}
-                    {$this->Html->tableCells($json)}
-                </table>
+                <div class='table-responsive'>
+                    <table class='table table-bordered'>
+                        {$this->Html->tableHeaders(array_map('humanize', array_keys($json[0])))}
+                        {$this->Html->tableCells($json)}
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -93,3 +95,4 @@ class UtilsHelper extends Helper
         return $value;
     }
 }
+˚
