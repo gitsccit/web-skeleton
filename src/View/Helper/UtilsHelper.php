@@ -95,4 +95,3 @@ class UtilsHelper extends Helper
         return $value;
     }
 }
-˚
