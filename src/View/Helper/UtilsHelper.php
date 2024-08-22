@@ -89,7 +89,9 @@ class UtilsHelper extends Helper
                 $value = str_replace('@', '@<wbr>', $value);
             }
             $value = __($value);
-            $value = $this->Text->truncate($value, $maxLength);
+            if ($value == strip_tags($value)) {
+                $value = $this->Text->truncate($value, $maxLength);
+            }
         }
 
         return $value;
