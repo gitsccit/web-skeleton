@@ -216,7 +216,11 @@ class FilterableBehavior extends Behavior
             $filterOperations[$key] = $operations;
         }
 
-        $selectedFilters = [];
+        $defaultSelectedFilters = array_map(function ($key) use ($filterOperations) {
+            $operation = $filterOperations[$key][0] ?? [$this->_defaultOperation];
+            return "{$key}__$operation";
+        }, array_keys($filterNames));
+        $selectedFilters = array_combine($defaultSelectedFilters, array_fill(0, count(array_keys($filterNames)), null));
         foreach ($this->_request->getQueryParams() as $key => $value) {
             $parts = explode('__', $key);
             $last = array_pop($parts);
@@ -230,6 +234,7 @@ class FilterableBehavior extends Behavior
                 $selectedFilters[$key] = $value;
             }
         }
+        dd($selectedFilters);
 
         return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
