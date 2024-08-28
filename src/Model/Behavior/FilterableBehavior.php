@@ -216,7 +216,7 @@ class FilterableBehavior extends Behavior
             $filterOperations[$key] = $operations;
         }
 
-        $selectedFilters = array_combine(array_keys($filterNames), array_fill(0, count(array_keys($filterNames)), null));
+        $selectedFilters = [];
         foreach ($this->_request->getQueryParams() as $key => $value) {
             $parts = explode('__', $key);
             $last = array_pop($parts);
