@@ -84,9 +84,30 @@ class FilterableBehavior extends Behavior
             $filterFields[$key] = $value;
         }
 
-        if ($searchString = $queryParams['q'] ?? null) {
+        $searchString = $queryParams['q'] ?? null;
+        $genericSearch = !empty($searchString);
+        unset($queryParams['q']);
+
+        if ($genericSearch) {
             foreach ($filterFields as $filterField => $filterOptions) {
-                $queryParams[$filterField] = $searchString;
+                if (empty($filterOptions)) {
+                    $filterOptions = [$this->_defaultOperation];
+                }
+
+                $indexContain = array_search('contains', $filterOptions);
+                $indexExact = array_search('exact', $filterOptions);
+
+                if ($indexContain === false && $indexExact === false) {
+                    continue;
+                } elseif ($indexContain === false) {
+                    $operation = 'exact';
+                } elseif ($indexExact === false) {
+                    $operation = 'contains';
+                } else {
+                    $operation = $indexExact < $indexContain ? 'exact' : 'contains';
+                }
+
+                $queryParams["{$filterField}__$operation"] = $searchString;
             }
         }
 
@@ -98,13 +119,10 @@ class FilterableBehavior extends Behavior
 
             // find the sql operation for the operation. i.e. 'lt' => '<', 'contains' => 'LIKE', etc.
             $operation = array_pop($fields);
-            $sqlOperation = $this->_operationLookup[$operation] ?? null;
 
-            // not recognized operation, treat as entity field. e.g. 'name' in 'Users__name'.
-            if (!$sqlOperation) {
-                $fields[] = $operation;
-                $operation = $this->_defaultOperation;
-                $sqlOperation = $this->_operationLookup[$this->_defaultOperation];
+            // not recognized operation
+            if (!array_key_exists($operation, $this->_operationLookup)) {
+                throw new BadRequestException("Operation '$operation' in $param is unrecognizable.");
             }
 
             // current table fields. e.g. turn ['name'] to ['Users', 'name'].
@@ -115,6 +133,7 @@ class FilterableBehavior extends Behavior
             // check if the operation is permitted on this field.
             $param = implode('__', $fields);
             $allowedOperations = $filterFields[$param] ?? [];
+            $sqlOperation = $this->_operationLookup[$operation];
 
             // skip unrecognized query params
             if (!isset($filterFields[$param])) {
@@ -153,7 +172,7 @@ class FilterableBehavior extends Behavior
             $conditions["$sqlField $sqlOperation"] = $value;
         }
 
-        $query->where(isset($queryParams['q']) ? ['OR' => $conditions] : $conditions);
+        $query->where($genericSearch ? ['OR' => $conditions] : $conditions);
 
         return $event;
     }
