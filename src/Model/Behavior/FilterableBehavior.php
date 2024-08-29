@@ -122,7 +122,7 @@ class FilterableBehavior extends Behavior
 
             // not recognized operation
             if (!array_key_exists($operation, $this->_operationLookup)) {
-                throw new BadRequestException("Operation '$operation' in $param is unrecognizable.");
+                continue;
             }
 
             // current table fields. e.g. turn ['name'] to ['Users', 'name'].
