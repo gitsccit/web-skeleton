@@ -234,7 +234,6 @@ class FilterableBehavior extends Behavior
                 $selectedFilters[$key] = $value;
             }
         }
-        dd($selectedFilters);
 
         return compact('filterNames', 'filterOperations', 'selectedFilters');
     }
