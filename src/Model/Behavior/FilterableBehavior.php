@@ -182,14 +182,16 @@ class FilterableBehavior extends Behavior
     }
 
     /**
-     * Returns view variables `$filterNames`, `$filterOperations`, `$selectedFilters`.
+     * Returns view variables `$filterNames`, `$genericFilterNames`, `$filterOperations`, `$selectedFilters`.
      *
      * @param Table|string|null $tableClass The class of the table that you want to filter
      */
     public function getFilterVariables()
     {
         $filterFields = $this->getConfigOrFail('fields');
+        $genericFields = $this->getConfig('genericFields', $filterFields);
         $filterNames = $this->getConfig('names', []);
+        $genericFilterNames = [];
         $filterOperations = [];
         $tableName = $this->_table->getAlias();
 
@@ -198,6 +200,8 @@ class FilterableBehavior extends Behavior
                 $key = $operations;
                 $operations = null;
             }
+
+            $addTogenericField = in_array($key, $genericFields);
 
             // filter names
             if (!isset($filterNames[$key])) {
@@ -214,6 +218,10 @@ class FilterableBehavior extends Behavior
 
                 $value = humanize($value);
                 $filterNames[$key] = $value;
+
+                if ($addTogenericField) {
+                    $genericFilterNames[$key] = $value;
+                }
             }
 
             // filter operations
@@ -239,7 +247,7 @@ class FilterableBehavior extends Behavior
             }
         }
 
-        return compact('filterNames', 'filterOperations', 'selectedFilters');
+        return compact('filterNames', 'genericFilterNames', 'filterOperations', 'selectedFilters');
     }
 
     /**
