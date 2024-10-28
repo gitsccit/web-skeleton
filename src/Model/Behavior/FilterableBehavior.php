@@ -48,10 +48,18 @@ class FilterableBehavior extends Behavior
     public function beforeFind(Event $event, Query $query, \ArrayObject $options, $primary)
     {
         $filterFields = $this->getConfigOrFail('fields');
+        $genericFields = $this->getConfig('genericFields', $filterFields);
         $queryParams = $this->_request->getQueryParams();
         $table = $event->getSubject();
         $controllerName = $this->_request->getParam('controller');
         $tableName = $table->getAlias();
+        $searchString = $queryParams['q'] ?? null;
+        $genericSearch = !empty($searchString);
+        unset($queryParams['q']);
+
+        if ($genericSearch) {
+            $filterFields = $genericFields;
+        }
 
         if ($controllerName === $tableName) {
             $this->setConfig('enabled', true);
@@ -83,10 +91,6 @@ class FilterableBehavior extends Behavior
 
             $filterFields[$key] = $value;
         }
-
-        $searchString = $queryParams['q'] ?? null;
-        $genericSearch = !empty($searchString);
-        unset($queryParams['q']);
 
         if ($genericSearch) {
             foreach ($filterFields as $filterField => $filterOptions) {
