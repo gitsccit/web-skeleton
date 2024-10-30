@@ -28,6 +28,8 @@ class FilterableBehavior extends Behavior
 
     protected $_operationLookup = [
         'contains' => 'LIKE',
+        'starts_with' => 'LIKE',
+        'ends_with' => 'LIKE',
         'exact' => '=',
         'lt' => '<',
         'lte' => '<=',
@@ -154,8 +156,16 @@ class FilterableBehavior extends Behavior
             // construct sql field, e.g. 'Tags.name'.
             $sqlField = implode('.', array_slice($fields, -2));
 
-            if ($sqlOperation === 'LIKE') {
-                $value = "%$value%";
+            switch ($operation) {
+                case 'contains':
+                    $value = "%$value%";
+                    break;
+                case 'starts_with':
+                    $value = "$value%";
+                    break;
+                case 'ends_with':
+                    $value = "%$value";
+                    break;
             }
 
             // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'.
