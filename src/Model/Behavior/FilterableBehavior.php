@@ -199,43 +199,45 @@ class FilterableBehavior extends Behavior
     public function getFilterVariables()
     {
         $filterFields = $this->getConfigOrFail('fields');
-        $genericFields = $this->getConfig('genericFields', $filterFields);
+        $genericFields = $this->getConfig('genericFields', []);
         $filterNames = $this->getConfig('names', []);
         $genericFilterNames = [];
         $filterOperations = [];
         $tableName = $this->_table->getAlias();
 
-        foreach ($filterFields as $key => $operations) {
-            if (is_numeric($key)) { // e.g. 0 => 'title'
-                $key = $operations;
+        foreach ($filterFields as $filterField => $operations) {
+            if (is_numeric($filterField)) { // e.g. 0 => 'title'
+                $filterField = $operations;
                 $operations = null;
             }
 
-            $addTogenericField = in_array($key, $genericFields);
+            $addToGenericField = empty($genericFields) ? true : in_array($filterField, $genericFields);
+            $filterName = $filterNames[$filterField] ?? null;
 
             // filter names
-            if (!isset($filterNames[$key])) {
-                $fields = explode('__', $key);
+            if (empty($filterName)) {
+                $fields = explode('__', $filterField);
                 if (count($fields) === 1) { // e.g. 'first_name'
-                    $value = $key; // 'first_name'
-                    $key = "{$tableName}__$value"; // 'Users__first_name'
+                    $filterName = $filterField; // 'first_name'
+                    $filterField = "{$tableName}__$filterName"; // 'Users__first_name'
                 } else {  // e.g. turn 'Users__first_name' to 'User First Name'
                     $field = array_pop($fields);
                     $associations = array_map('Cake\Utility\Inflector::singularize', $fields);
                     $fields = array_merge($associations, [$field]);
-                    $value = implode(' ', $fields);
+                    $filterName = implode(' ', $fields);
                 }
 
-                $value = humanize($value);
-                $filterNames[$key] = $value;
+                $filterName = humanize($filterName);
+            }
 
-                if ($addTogenericField) {
-                    $genericFilterNames[$key] = $value;
-                }
+            $filterNames[$filterField] = $filterName;
+
+            if ($addToGenericField) {
+                $genericFilterNames[$filterField] = $filterName;
             }
 
             // filter operations
-            $filterOperations[$key] = $operations;
+            $filterOperations[$filterField] = $operations;
         }
 
         $defaultSelectedFilters = array_map(function ($key) use ($filterOperations) {
@@ -243,7 +245,7 @@ class FilterableBehavior extends Behavior
             return "{$key}__$operation";
         }, array_keys($filterNames));
         $selectedFilters = array_combine($defaultSelectedFilters, array_fill(0, count(array_keys($filterNames)), null));
-        foreach ($this->_request->getQueryParams() as $key => $value) {
+        foreach ($this->_request->getQueryParams() as $key => $filterName) {
             $parts = explode('__', $key);
             $last = array_pop($parts);
 
@@ -253,7 +255,7 @@ class FilterableBehavior extends Behavior
             $filterField = implode('__', $parts);
 
             if (array_key_exists($filterField, $filterNames)) {
-                $selectedFilters[$key] = $value;
+                $selectedFilters[$key] = $filterName;
             }
         }
 
