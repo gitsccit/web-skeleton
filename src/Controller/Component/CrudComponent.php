@@ -142,7 +142,8 @@ class CrudComponent extends Component
             $accessibleFields = array_filter($entityFields, function ($field) {
                 $entityClass = $this->_table->getEntityClass();
 
-                return (new $entityClass())->isAccessible($field);
+                return (new $entityClass())->isAccessible($field) &&
+                    !in_array($field, ['id', 'created_at', 'modified_at', 'updated_at']);
             });
             $accessibleFields = array_combine($accessibleFields, array_fill(0, count($accessibleFields), []));
             $this->_controller->set(compact('accessibleFields'));
