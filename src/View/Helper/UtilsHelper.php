@@ -31,7 +31,9 @@ class UtilsHelper extends Helper
      */
     public function display($value, $maxLength = 50)
     {
-        if (is_numeric($value) && !is_string($value)) {
+        if (empty($value)) {
+            $value = "—";
+        } elseif (is_numeric($value) && !is_string($value)) {
             $value = (string)$value;
         } elseif (is_bool($value)) {
             $value = $value ? __('Yes') : __('No');
@@ -53,8 +55,6 @@ class UtilsHelper extends Helper
         } elseif ($value instanceof \DateTimeInterface) {
             $timezone = $this->_View->getRequest()->getSession()->read('Auth.time_zone.name');
             $value = $this->_View->Time->format($value, null, false, $timezone);
-        } elseif (empty($value)) {
-            $value = "—";
         } elseif (is_string($value)) {
             $json = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
