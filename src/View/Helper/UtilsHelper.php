@@ -32,7 +32,7 @@ class UtilsHelper extends Helper
     public function display($value, $maxLength = 50)
     {
         if (empty($value)) {
-            $value = "—";
+            $value = '—';
         } elseif (is_numeric($value) && !is_string($value)) {
             $value = (string)$value;
         } elseif (is_bool($value)) {
@@ -48,7 +48,7 @@ class UtilsHelper extends Helper
                     return class_exists("App\Controller\\$prefix\\{$controller}Controller");
                 })[0] ?? null;
             }
-            $value = $this->Html->link(
+            $value = empty($value->{$table->getDisplayField()}) ? '—' : $this->Html->link(
                 __($value->{$table->getDisplayField()}),
                 ['controller' => $controller, 'action' => 'view', $value->id, 'prefix' => $prefix, 'plugin' => $plugin]
             );
