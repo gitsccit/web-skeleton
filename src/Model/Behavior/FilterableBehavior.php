@@ -24,9 +24,7 @@ class FilterableBehavior extends Behavior
         'enabled' => false,
     ];
 
-    protected $_request;
-
-    protected $_operationLookup = [
+    protected array $_operationLookup = [
         'contains' => 'LIKE',
         'starts_with' => 'LIKE',
         'ends_with' => 'LIKE',
@@ -38,22 +36,16 @@ class FilterableBehavior extends Behavior
         'ne' => '!=',
     ];
 
-    protected $_defaultOperation = 'contains';
-
-    public function __construct(Table $table, array $config = [])
-    {
-        parent::__construct($table, $config);
-
-        $this->_request = Router::getRequest();
-    }
+    protected string $_defaultOperation = 'contains';
 
     public function beforeFind(Event $event, Query $query, \ArrayObject $options, $primary)
     {
         $filterFields = $this->getConfigOrFail('fields');
         $genericFields = $this->getConfig('genericFields', $filterFields);
-        $queryParams = $this->_request->getQueryParams();
+        $request = Router::getRequest();
+        $queryParams = $request->getQueryParams();
         $table = $event->getSubject();
-        $controllerName = $this->_request->getParam('controller');
+        $controllerName = $request->getParam('controller');
         $tableName = $table->getAlias();
         $searchString = $queryParams['q'] ?? null;
         $genericSearch = !empty($searchString);
@@ -245,7 +237,7 @@ class FilterableBehavior extends Behavior
             return "{$key}__$operation";
         }, array_keys($filterNames));
         $selectedFilters = array_combine($defaultSelectedFilters, array_fill(0, count(array_keys($filterNames)), null));
-        foreach ($this->_request->getQueryParams() as $key => $filterName) {
+        foreach (Router::getRequest()->getQueryParams() as $key => $filterName) {
             $parts = explode('__', $key);
             $last = array_pop($parts);
 
