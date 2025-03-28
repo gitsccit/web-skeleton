@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Skeleton\Controller\Component;
 
+use Cake\Collection\Collection;
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
 use Cake\Core\App;
@@ -268,14 +269,18 @@ class CrudComponent extends Component
 
             // get all associated tables of the types in $associationTypes
             $associations = $table->associations()->getByType($associationTypes);
+            $associations = (new Collection($associations))->indexBy(function ($association) {
+                // index by the name of the association for easier access later
+                return $association->getName();
+            })->toArray();
 
             // construct queries for the associated tables
-            foreach ($associations as $association) {
-                $associatedTable = $association->getTarget();
-
+            foreach ($contain as $containField => $nestedContain) {
                 // if association is in original 'contain'
-                if (isset($contain[$association->getName()])) {
-                    $nestedContain = $contain[$association->getName()] ?? [];
+                if (isset($associations[$containField])) {
+                    $association = $associations[$containField];
+                    $associatedTable = $association->getTarget();
+
                     $query = $associatedTable->find(contain: $nestedContain);
 
                     if ($association instanceof Association\HasMany) {
