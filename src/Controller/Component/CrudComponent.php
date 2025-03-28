@@ -329,9 +329,6 @@ class CrudComponent extends Component
             $field = Inflector::variable($table->getAlias());
             $fieldSettings = array_merge($settings, ['scope' => Inflector::dasherize($field)]);
             $result = $this->_controller->paginate($query, $fieldSettings);
-            if ($result->count() === 0) {
-                $result = $table;
-            }
             $resultSets['associations'][$field] = $result;
         }
 
