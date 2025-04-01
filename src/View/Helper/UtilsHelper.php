@@ -29,7 +29,7 @@ class UtilsHelper extends Helper
      * @param mixed $value
      * @return string Parsed string.
      */
-    public function display($value, $maxLength = 50)
+    public function display($value, $maxLength = 100)
     {
         if (empty($value)) {
             $value = '—';
@@ -59,7 +59,6 @@ class UtilsHelper extends Helper
             $json = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
                 $json = array_is_list($json) ? $json : [$json];
-                $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                 $id = random_string(16);
                 $value = "<a href='javascrip(0)' data-bs-toggle='modal' data-bs-target='#$id'>View</a>
 
@@ -89,11 +88,8 @@ class UtilsHelper extends Helper
                 $value = str_replace('@', '@<wbr>', $value);
             }
             $value = __($value);
-            if ($value == strip_tags($value)) {
-                $value = $this->Text->truncate($value, $maxLength);
-            }
         }
 
-        return $value;
+        return $this->Text->truncate($value, $maxLength);
     }
 }
