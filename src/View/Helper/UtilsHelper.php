@@ -90,6 +90,10 @@ class UtilsHelper extends Helper
             $value = __($value);
         }
 
-        return $this->Text->truncate($value, $maxLength);
+        if ($maxLength !== null) {
+            return $this->Text->truncate($value, $maxLength);
+        }
+
+        return $value;
     }
 }
