@@ -29,7 +29,7 @@ class UtilsHelper extends Helper
      * @param mixed $value
      * @return string Parsed string.
      */
-    public function display($value, $maxLength = 100)
+    public function display(mixed $value, int $maxLength = null): string
     {
         if (empty($value)) {
             $value = '—';
