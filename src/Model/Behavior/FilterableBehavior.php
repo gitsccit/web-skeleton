@@ -24,6 +24,8 @@ class FilterableBehavior extends Behavior
         'enabled' => false,
     ];
 
+    protected $_request;
+
     protected array $_operationLookup = [
         'contains' => 'LIKE',
         'starts_with' => 'LIKE',
@@ -42,10 +44,10 @@ class FilterableBehavior extends Behavior
     {
         $filterFields = $this->getConfigOrFail('fields');
         $genericFields = $this->getConfig('genericFields', $filterFields);
-        $request = Router::getRequest();
-        $queryParams = $request->getQueryParams();
+        $this->_request = Router::getRequest();
+        $queryParams = $this->_request->getQueryParams();
         $table = $event->getSubject();
-        $controllerName = $request->getParam('controller');
+        $controllerName = $this->_request->getParam('controller');
         $tableName = $table->getAlias();
         $searchString = $queryParams['q'] ?? null;
         $genericSearch = !empty($searchString);
@@ -59,128 +61,119 @@ class FilterableBehavior extends Behavior
             $this->setConfig('enabled', true);
         }
 
-        // skip if filtering for this table is not enabled.
-        if (!$this->getConfig('enabled')) {
-            return $event;
-        }
+        // execute only if filtering for this table is enabled, and adding conditions on the primary query only.
+        if ($this->getConfig('enabled') && $primary) {
+            // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
+            foreach ($filterFields as $key => $value) {
+                unset($filterFields[$key]);
 
-        // prevent adding conditions on subqueries.
-        if (!$primary) {
-            return $event;
-        }
-
-        // retrieve and lowercase all filterable entries for case-sensitive query param comparison.
-        foreach ($filterFields as $key => $value) {
-            unset($filterFields[$key]);
-
-            if (is_numeric($key)) {
-                $key = $value;
-                $value = [$this->_defaultOperation];
-            }
-
-            // prefix current table fields with current able name, i.e. "name" -> "Users__name"
-            if (!strpos($key, '__')) {
-                $key = "{$tableName}__$key";
-            }
-
-            $filterFields[$key] = $value;
-        }
-
-        if ($genericSearch) {
-            foreach ($filterFields as $filterField => $filterOptions) {
-                if (empty($filterOptions)) {
-                    $filterOptions = [$this->_defaultOperation];
+                if (is_numeric($key)) {
+                    $key = $value;
+                    $value = [$this->_defaultOperation];
                 }
 
-                $indexContain = array_search('contains', $filterOptions);
-                $indexExact = array_search('exact', $filterOptions);
+                // prefix current table fields with current able name, i.e. "name" -> "Users__name"
+                if (!strpos($key, '__')) {
+                    $key = "{$tableName}__$key";
+                }
 
-                if ($indexContain === false && $indexExact === false) {
+                $filterFields[$key] = $value;
+            }
+
+            if ($genericSearch) {
+                foreach ($filterFields as $filterField => $filterOptions) {
+                    if (empty($filterOptions)) {
+                        $filterOptions = [$this->_defaultOperation];
+                    }
+
+                    $indexContain = array_search('contains', $filterOptions);
+                    $indexExact = array_search('exact', $filterOptions);
+
+                    if ($indexContain === false && $indexExact === false) {
+                        continue;
+                    } elseif ($indexContain === false) {
+                        $operation = 'exact';
+                    } elseif ($indexExact === false) {
+                        $operation = 'contains';
+                    } else {
+                        $operation = $indexExact < $indexContain ? 'exact' : 'contains';
+                    }
+
+                    $queryParams["{$filterField}__$operation"] = $searchString;
+                }
+            }
+
+            // add the `and` conditions. e.g. WHERE ... AND `name` LIKE "%James%" AND `age` <= 23.
+            $conditions = [];
+            foreach ($queryParams as $param => $value) {
+                // get the fields in the query param, i.e. ['Users', 'age', 'lt'] for 'Users__age__lt'.
+                $fields = explode('__', $param);
+
+                // find the sql operation for the operation. i.e. 'lt' => '<', 'contains' => 'LIKE', etc.
+                $operation = array_pop($fields);
+
+                // not recognized operation
+                if (!array_key_exists($operation, $this->_operationLookup)) {
                     continue;
-                } elseif ($indexContain === false) {
-                    $operation = 'exact';
-                } elseif ($indexExact === false) {
-                    $operation = 'contains';
-                } else {
-                    $operation = $indexExact < $indexContain ? 'exact' : 'contains';
                 }
 
-                $queryParams["{$filterField}__$operation"] = $searchString;
-            }
-        }
-
-        // add the `and` conditions. e.g. WHERE ... AND `name` LIKE "%James%" AND `age` <= 23.
-        $conditions = [];
-        foreach ($queryParams as $param => $value) {
-            // get the fields in the query param, i.e. ['Users', 'age', 'lt'] for 'Users__age__lt'.
-            $fields = explode('__', $param);
-
-            // find the sql operation for the operation. i.e. 'lt' => '<', 'contains' => 'LIKE', etc.
-            $operation = array_pop($fields);
-
-            // not recognized operation
-            if (!array_key_exists($operation, $this->_operationLookup)) {
-                continue;
-            }
-
-            // current table fields. e.g. turn ['name'] to ['Users', 'name'].
-            if (count($fields) === 1) {
-                array_unshift($fields, $table->getAlias());
-            }
-
-            // check if the operation is permitted on this field.
-            $param = implode('__', $fields);
-            $allowedOperations = $filterFields[$param] ?? [];
-            $sqlOperation = $this->_operationLookup[$operation];
-
-            // skip unrecognized query params
-            if (!isset($filterFields[$param])) {
-                continue;
-            }
-
-            if (!in_array($operation, $allowedOperations)) {
-                throw new BadRequestException("Operation '$operation' is not permitted on $param.");
-            }
-
-            // get the associations. e.g. ['Articles', 'Tags'] for 'Articles__Tags__name'.
-            $association = implode('.', array_slice($fields, 0, -1));
-
-            // construct sql field, e.g. 'Tags.name'.
-            $sqlField = implode('.', array_slice($fields, -2));
-
-            switch ($operation) {
-                case 'contains':
-                    $value = "%$value%";
-                    break;
-                case 'starts_with':
-                    $value = "$value%";
-                    break;
-                case 'ends_with':
-                    $value = "%$value";
-                    break;
-            }
-
-            // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'.
-            if ($value === 'NULL') {
-                if ($sqlOperation === '=') {
-                    $sqlOperation = 'IS';
-                } elseif ($sqlOperation === '!=') {
-                    $sqlOperation = 'IS NOT';
+                // current table fields. e.g. turn ['name'] to ['Users', 'name'].
+                if (count($fields) === 1) {
+                    array_unshift($fields, $table->getAlias());
                 }
-                $value = null;
+
+                // check if the operation is permitted on this field.
+                $param = implode('__', $fields);
+                $allowedOperations = $filterFields[$param] ?? [];
+                $sqlOperation = $this->_operationLookup[$operation];
+
+                // skip unrecognized query params
+                if (!isset($filterFields[$param])) {
+                    continue;
+                }
+
+                if (!in_array($operation, $allowedOperations)) {
+                    throw new BadRequestException("Operation '$operation' is not permitted on $param.");
+                }
+
+                // get the associations. e.g. ['Articles', 'Tags'] for 'Articles__Tags__name'.
+                $association = implode('.', array_slice($fields, 0, -1));
+
+                // construct sql field, e.g. 'Tags.name'.
+                $sqlField = implode('.', array_slice($fields, -2));
+
+                switch ($operation) {
+                    case 'contains':
+                        $value = "%$value%";
+                        break;
+                    case 'starts_with':
+                        $value = "$value%";
+                        break;
+                    case 'ends_with':
+                        $value = "%$value";
+                        break;
+                }
+
+                // change '= NULL' to 'IS NULL' and '!= NULL' to 'IS NOT NULL'.
+                if ($value === 'NULL') {
+                    if ($sqlOperation === '=') {
+                        $sqlOperation = 'IS';
+                    } elseif ($sqlOperation === '!=') {
+                        $sqlOperation = 'IS NOT';
+                    }
+                    $value = null;
+                }
+
+                // construct query
+                if ($table->hasAssociation($association)) {
+                    $query->leftJoinWith($association);
+                }
+
+                $conditions["$sqlField $sqlOperation"] = $value;
             }
 
-            // construct query
-            if ($table->hasAssociation($association)) {
-                $query->leftJoinWith($association);
-            }
-
-            $conditions["$sqlField $sqlOperation"] = $value;
+            $query->where($genericSearch ? ['OR' => $conditions] : $conditions);
         }
-
-        $query->where($genericSearch ? ['OR' => $conditions] : $conditions);
-
-        return $event;
     }
 
     /**
@@ -237,7 +230,7 @@ class FilterableBehavior extends Behavior
             return "{$key}__$operation";
         }, array_keys($filterNames));
         $selectedFilters = array_combine($defaultSelectedFilters, array_fill(0, count(array_keys($filterNames)), null));
-        foreach (Router::getRequest()->getQueryParams() as $key => $filterName) {
+        foreach ($this->_request->getQueryParams() as $key => $filterName) {
             $parts = explode('__', $key);
             $last = array_pop($parts);
 
