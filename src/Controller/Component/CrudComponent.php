@@ -159,7 +159,7 @@ class CrudComponent extends Component
             $status = $data;
             $data = [];
         } elseif (is_string($data)) {
-            $data = ['message' => $data];
+            $data = ['messages' => [$data]];
         } elseif ($data instanceof EntityInterface || $data instanceof ResultSetInterface) {
             $data = $data->toArray();
         } elseif (!$data) {
