@@ -85,73 +85,67 @@ class CrudComponent extends Component
         $data = $this->_controller->viewBuilder()->getVars();
 
         if ($this->_controller->viewBuilder()->getOption('serialize')) {
-            return $this->_controller->viewBuilder()->setClassName('Json');
-        }
+            $this->_controller->viewBuilder()->setClassName('Json');
+        } elseif ($this->_serialized) {
+            $this->serialize($data);
+        } elseif ($this->_table) {
+            $template = $this->_controller->viewBuilder()->getTemplate();
 
-        if ($this->_serialized) {
-            return $this->serialize($data);
-        }
-
-        if (!$this->_table) {
-            return $event;
-        }
-
-        $template = $this->_controller->viewBuilder()->getTemplate();
-
-        // set template
-        $templateName = Inflector::underscore($this->_action) . '.php';
-        $fallbackTemplatePath = $this->getConfig('fallbackTemplatePath');
-        [$plugin, $templateFolder] = pluginSplit($fallbackTemplatePath);
-        $basePath = is_null($plugin) ? App::path('templates')[0] : App::path('templates', $plugin)[0];
-        if ($template) {
-            $components = explode(DS, $template);
-            if (count($components) > 1) {
-                $template = array_pop($components);
-                $this->_controller->viewBuilder()->setTemplatePath(implode(DS, $components));
+            // set template
+            $templateName = Inflector::underscore($this->_action) . '.php';
+            $fallbackTemplatePath = $this->getConfig('fallbackTemplatePath');
+            [$plugin, $templateFolder] = pluginSplit($fallbackTemplatePath);
+            $basePath = is_null($plugin) ? App::path('templates')[0] : App::path('templates', $plugin)[0];
+            if ($template) {
+                $components = explode(DS, $template);
+                if (count($components) > 1) {
+                    $template = array_pop($components);
+                    $this->_controller->viewBuilder()->setTemplatePath(implode(DS, $components));
+                }
+                $this->_controller->viewBuilder()->setTemplate($template);
+            } elseif (
+                !file_exists(App::path('templates')[0] . $this->_viewPath() . $templateName)
+                && file_exists($basePath . $templateFolder . DS . $templateName)
+            ) {
+                $this->_controller->viewBuilder()->setTheme($plugin);
+                $this->_controller->viewBuilder()->setTemplatePath($templateFolder);
             }
-            $this->_controller->viewBuilder()->setTemplate($template);
-        } elseif (
-            !file_exists(App::path('templates')[0] . $this->_viewPath() . $templateName)
-            && file_exists($basePath . $templateFolder . DS . $templateName)
-        ) {
-            $this->_controller->viewBuilder()->setTheme($plugin);
-            $this->_controller->viewBuilder()->setTemplatePath($templateFolder);
+
+            // set view variables
+            $className = $this->_controller->getName();
+            $displayField = $this->_table->getDisplayField();
+            $title = humanize($this->_table->getAlias());
+
+            // set $entities / $entity
+            $name = $this->_action === 'index' ? 'entities' : 'entity';
+            $entityName = lcfirst($this->_action === 'index' ? $className : Inflector::classify($className));
+            if ($entity = $data[$entityName] ?? null) {
+                $this->_controller->set([$name => $entity]);
+            }
+
+            // set $accessibleFields and $viewVars if action requires user input
+            if (in_array($this->_action, ['add', 'edit'])) {
+                $belongsTo = array_map(function (Association $association) {
+                    return $association->getName();
+                }, $this->_table->associations()->getByType('BelongsTo'));
+
+                $entityFields = array_merge(
+                    $this->_table->getSchema()->columns(),
+                    array_map([Inflector::class, 'underscore'], $belongsTo)
+                );
+                $accessibleFields = array_filter($entityFields, function ($field) {
+                    $entityClass = $this->_table->getEntityClass();
+
+                    return (new $entityClass())->isAccessible($field) &&
+                        !in_array($field, ['id', 'created_at', 'modified_at', 'updated_at']);
+                });
+                $accessibleFields = array_combine($accessibleFields, array_fill(0, count($accessibleFields), []));
+                $this->_controller->set(compact('accessibleFields'));
+            }
+
+            // set the extra view variables
+            $this->_controller->set(compact('className', 'displayField', 'title'));
         }
-
-        // set view variables
-        $className = $this->_controller->getName();
-        $displayField = $this->_table->getDisplayField();
-        $title = humanize($this->_table->getAlias());
-
-        // set $entities / $entity
-        $name = $this->_action === 'index' ? 'entities' : 'entity';
-        $entityName = lcfirst($this->_action === 'index' ? $className : Inflector::classify($className));
-        if ($entity = $data[$entityName] ?? null) {
-            $this->_controller->set([$name => $entity]);
-        }
-
-        // set $accessibleFields and $viewVars if action requires user input
-        if (in_array($this->_action, ['add', 'edit'])) {
-            $belongsTo = array_map(function (Association $association) {
-                return $association->getName();
-            }, $this->_table->associations()->getByType('BelongsTo'));
-
-            $entityFields = array_merge(
-                $this->_table->getSchema()->columns(),
-                array_map([Inflector::class, 'underscore'], $belongsTo)
-            );
-            $accessibleFields = array_filter($entityFields, function ($field) {
-                $entityClass = $this->_table->getEntityClass();
-
-                return (new $entityClass())->isAccessible($field) &&
-                    !in_array($field, ['id', 'created_at', 'modified_at', 'updated_at']);
-            });
-            $accessibleFields = array_combine($accessibleFields, array_fill(0, count($accessibleFields), []));
-            $this->_controller->set(compact('accessibleFields'));
-        }
-
-        // set the extra view variables
-        $this->_controller->set(compact('className', 'displayField', 'title'));
     }
 
     /**
